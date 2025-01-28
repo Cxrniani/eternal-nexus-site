@@ -1,8 +1,10 @@
-import Checkout from "@/components/Checkout";
-import EmbeddedCheckoutButton from "@/components/EmbeddedCheckoutButton";
+import CheckoutCard from "@/components/CheckoutCard";
+
 
 export default function Payment() {
     return (
-        <EmbeddedCheckoutButton/>
+        <>
+            <CheckoutCard />
+        </>
     )
 }
