@@ -62,7 +62,7 @@ const CheckoutCard = () => {
                         },
                         onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
                             event.preventDefault();
-                        
+
                             const {
                                 token,
                                 paymentMethodId,
@@ -72,12 +72,12 @@ const CheckoutCard = () => {
                                 identificationType,
                                 cardholderEmail,
                             } = cardForm.getCardFormData();
-                        
+
                             if (!token || !paymentMethodId || !issuerId || !installments || !identificationNumber || !identificationType || !cardholderEmail) {
                                 console.error("Um ou mais campos estão faltando ou inválidos.");
                                 return;
                             }
-                        
+
                             fetch("http://127.0.0.1:5000/process_payment", {
                                 method: "POST",
                                 headers: {
@@ -101,7 +101,7 @@ const CheckoutCard = () => {
                                         console.log("Dados do pagamento:", result.payment);
                                     } else {
                                         console.error("Erro no pagamento:", result.error);
-                                        console.log("Detalhes:", result.details || {});
+                                        console.log("Detalhes:", result.payment || {});
                                     }
                                 })
                                 .catch((error) => console.error("Erro na requisição:", error));
@@ -129,8 +129,11 @@ const CheckoutCard = () => {
             <div className="max-container py-5 flex-row">
                 <div className="flex w-full">
                     <div className="w-1/2 p-4 flex flex-col">
-                        <h1 className="py-5 text-2xl font-extrabold text-white">Checkout Pagamento</h1>
-                        <form id="form-checkout" className="flex flex-col max-w-[600px] space-y-4">
+                        <h1 className="py-5 text-2xl font-extrabold text-white">
+                            Checkout Pagamento
+                        </h1>
+                        <form id="form-checkout"
+                            className="flex flex-col max-w-[600px] space-y-4">
                             <div
                                 id="form-checkout__cardNumber"
                                 className="text-black h-8 border bg-white border-gray-500 rounded-sm p-2"
@@ -149,8 +152,10 @@ const CheckoutCard = () => {
                                 className="p-2 border text-black border-gray-500 rounded-sm"
                                 placeholder="Nome do Titular"
                             />
-                            <select id="form-checkout__issuer" className="p-2 border border-gray-500 rounded-sm text-black"></select>
-                            <select id="form-checkout__installments" className="p-2 border border-gray-500 rounded-sm text-black"></select>
+                            <select id="form-checkout__issuer"
+                                className="p-2 border border-gray-500 rounded-sm text-black"></select>
+                            <select id="form-checkout__installments"
+                                className="p-2 border border-gray-500 rounded-sm text-black"></select>
                             <select
                                 id="form-checkout__identificationType"
                                 className="p-2 border border-gray-500 rounded-sm text-black"
@@ -168,10 +173,15 @@ const CheckoutCard = () => {
                                 placeholder="Email"
                             />
 
-                            <button type="submit" id="form-checkout__submit" className="bg-blue-500 text-white p-2 rounded">
+                            <button
+                                type="submit"
+                                id="form-checkout__submit"
+                                className="bg-blue-500 text-white p-2 rounded">
                                 Pagar
                             </button>
-                            <progress value="0" className="progress-bar w-full h-2">
+                            <progress
+                                value="0"
+                                className="progress-bar w-full h-2">
                                 Carregando...
                             </progress>
                         </form>
