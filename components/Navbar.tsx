@@ -5,7 +5,7 @@ import Image from "next/image"
 
 export const Navbar = () => {
     return (
-        <div className="w-full bg-black bg-opacity-50">
+        <div className="w-full bg-preto-opaco bg-opacity-100">
         <nav className="flexBetween max-container
     padding-container relative z-30 py-5">
             <Link href={"/"} className="font-logoSuave text-white font-bold text-4xl leading-none hover:font-extrabold hover:text-black ease-in-out" >

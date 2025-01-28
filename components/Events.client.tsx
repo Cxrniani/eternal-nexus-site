@@ -48,7 +48,7 @@ const Events = () => {
   }
 
   return (
-    <div className='w-full h-100 bg-slate-950 px-10 pt-5 pb-20'>
+    <div className='w-full h-100 bg-slate-950 px-2 md:px-10 lg:px-10 pt-5 pb-20'>
       <AnimatedComponent>
         <h1 className='text-white font-logoSuave font-bold text-5xl text-center py-10'>Eventos Eternal Nexus</h1>
       </AnimatedComponent>
@@ -56,7 +56,7 @@ const Events = () => {
         <AnimatedComponent>
           <Slider {...settings}>
             {eventItems.map((item, index) => (
-              <div key={index} className="px-10 flex justify-center ">
+              <div key={index} className="px-2 md:px-10 lg:px-10 flex justify-center ">
                 <Card image={item.image} title={item.title} subtitle={item.subtitle} date={item.date} variant='large' />
               </div>
             ))}

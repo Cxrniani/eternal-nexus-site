@@ -9,7 +9,7 @@ const Slider = dynamic(() => import('react-slick'), { ssr: false })
 const Hero = () => {
   const heroItems = [
     {
-      image: 'https://placehold.co/800x600.png',
+      image: '/assets/background2.jpg',
       title: 'Título do Evento 1',
     },
     {
@@ -37,8 +37,9 @@ const Hero = () => {
     arrows: false,
   }
   return (
-    <div className='max-container h-100 bg-transparent pb-10 pt-20 px-0 mx-0 mb-36'>
-      <div className='plus-container mx-0 px-0'>
+    <div style={{backgroundImage:"url('assets/background.png')" }} className='bg-slate-900 bg-opacity-50 bg-blend-color-dodge h-[62vh] md:h-[100vh] md:pt-52 bg-cover bg-top md:mt-[-12vh]'>
+    <div className='max-container h-100 bg-transparent pt-0 pb-0' >
+      <div className='plus-container px-2 md:p-0 lg:p-0 pt-24'>
         <Slider {...settings}>
           {heroItems.map((item, index) => (
             <div key={index} className="flex justify-around px-0 mx-0">
@@ -47,6 +48,7 @@ const Hero = () => {
           ))}
         </Slider>
       </div>
+    </div>
     </div>
   )
 }

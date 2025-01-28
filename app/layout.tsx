@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-top bg-contain bg-no-repeat bg-purple-950" style={{backgroundImage:"url('assets/background.png')" }}>
+      <body className="bg-top bg-contain bg-no-repeat bg-preto-opaco"  style={{backgroundImage:"url('assets/background.png')" }}>
       <Navbar />
       <main className="relative overflow-hidden text-white">
         {children}
