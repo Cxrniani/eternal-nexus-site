@@ -1,3 +1,4 @@
+// /app/return/page.tsx
 import { stripe } from "@/utils/stripe";
 
 async function getSession(sessionId: string) {
@@ -9,7 +10,11 @@ interface SearchParams {
   session_id: string;
 }
 
-export default async function CheckoutReturn({ searchParams }: { searchParams: SearchParams }) {
+export default async function CheckoutReturn({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const sessionId = searchParams.session_id;
   const session = await getSession(sessionId);
 
@@ -23,7 +28,7 @@ export default async function CheckoutReturn({ searchParams }: { searchParams: S
     return (
       <h3>
         We appreciate your business! Your Stripe customer ID is:
-        {(session.customer as string)}.
+        {session.customer as string}.
       </h3>
     );
   }

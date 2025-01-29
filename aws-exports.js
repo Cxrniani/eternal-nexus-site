@@ -1,3 +1,4 @@
+// /aws-exports.js
 const awsconfig = {
   Auth: {
     region: "us-east-1",

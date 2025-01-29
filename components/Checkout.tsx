@@ -1,15 +1,13 @@
+// /components/Checkout.tsx
 const Checkout = () => {
-    return (
-        <div className="max-container h-[90vh] bg-slate-950 md:rounded-xl my-10">
-            <div className="flex justify-between h-full">
-                <div className="flex-1 bg-white m-2 p-4 rounded-lg">
+  return (
+    <div className="max-container h-[90vh] bg-slate-950 md:rounded-xl my-10">
+      <div className="flex justify-between h-full">
+        <div className="flex-1 bg-white m-2 p-4 rounded-lg"></div>
+        <div className="flex-1 bg-white m-2 p-4 rounded-lg"></div>
+      </div>
+    </div>
+  );
+};
 
-                </div>
-                <div className="flex-1 bg-white m-2 p-4 rounded-lg">
-
-                </div>
-            </div>
-        </div>)
-}
-
-export default Checkout
+export default Checkout;

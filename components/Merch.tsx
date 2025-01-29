@@ -1,8 +1,9 @@
-"use client"
+// /components/Merch.tsx
+"use client";
 
-import React from 'react'
-import Slider from 'react-slick'
-import Card from './Card'
+import React from "react";
+import Slider from "react-slick";
+import Card from "./Card";
 import AnimatedComponent from "@/components/AnimatedComponent.client";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -10,30 +11,30 @@ import "slick-carousel/slick/slick-theme.css";
 const Merch = () => {
   const merchItems = [
     {
-      image: 'https://placehold.co/600x400.png',
-      title: 'Título do Card 1',
-      subtitle: 'Subtítulo do Card 1',
-      variant: 'buy',
+      image: "https://placehold.co/600x400.png",
+      title: "Título do Card 1",
+      subtitle: "Subtítulo do Card 1",
+      variant: "buy",
     },
     {
-      image: 'https://placehold.co/600x400.png',
-      title: 'Título do Card 2',
-      subtitle: 'Subtítulo do Card 2',
-      variant: 'buy',
+      image: "https://placehold.co/600x400.png",
+      title: "Título do Card 2",
+      subtitle: "Subtítulo do Card 2",
+      variant: "buy",
     },
     {
-      image: 'https://placehold.co/600x400.png',
-      title: 'Título do Card 3',
-      subtitle: 'Subtítulo do Card 3',
-      variant: 'buy',
+      image: "https://placehold.co/600x400.png",
+      title: "Título do Card 3",
+      subtitle: "Subtítulo do Card 3",
+      variant: "buy",
     },
     {
-      image: 'https://placehold.co/600x400.png',
-      title: 'Título do Card 4',
-      subtitle: 'Subtítulo do Card 4',
-      variant: 'buy',
+      image: "https://placehold.co/600x400.png",
+      title: "Título do Card 4",
+      subtitle: "Subtítulo do Card 4",
+      variant: "buy",
     },
-  ]
+  ];
 
   const settings = {
     dots: false,
@@ -66,19 +67,29 @@ const Merch = () => {
         },
       },
     ],
-  }
+  };
 
   return (
-    <div className='w-full bg-fit py-10 bg-slate-900 bg-blend-lighten' style={{backgroundImage:"url('assets/background.png')" }} >
-      <div className='plus-container md:rounded-xl lg:rounded-xl bg-slate-900 py-10 px-1 md:p-10' >
-        <div className='max-container'>
+    <div
+      className="w-full bg-fit py-10 bg-slate-900 bg-blend-lighten"
+      style={{ backgroundImage: "url('assets/background.png')" }}
+    >
+      <div className="plus-container md:rounded-xl lg:rounded-xl bg-slate-900 py-10 px-1 md:p-10">
+        <div className="max-container">
           <AnimatedComponent>
-            <h1 className='mb-5 font-logoSuave font-bold text-4xl lg:text-start text-center'>Eternal Store</h1>
+            <h1 className="mb-5 font-logoSuave font-bold text-4xl lg:text-start text-center">
+              Eternal Store
+            </h1>
             <div>
               <Slider {...settings}>
                 {merchItems.map((item, index) => (
                   <div key={index} className="px-1 md:p-0 lg:p-0">
-                    <Card image={item.image} title={item.title} subtitle={item.subtitle} variant='buy' />
+                    <Card
+                      image={item.image}
+                      title={item.title}
+                      subtitle={item.subtitle}
+                      variant="buy"
+                    />
                   </div>
                 ))}
               </Slider>
@@ -87,7 +98,7 @@ const Merch = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Merch
+export default Merch;

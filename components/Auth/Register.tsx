@@ -1,3 +1,4 @@
+// /components/Auth/Register.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -6,23 +7,46 @@ import {
   CognitoUserAttribute,
 } from "amazon-cognito-identity-js";
 import { poolData } from "@/cognitoConfig";
-import { useRouter } from "next/navigation"; // Correto para Next.js
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const userPool = new CognitoUserPool(poolData);
 
 const Register = () => {
-  const router = useRouter(); // Padrão Next.js
-
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  // Register.tsx
+  const validatePassword = (password: string) => {
+    const regex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
+    return regex.test(password);
+  };
+
+  const validateForm = () => {
+    if (!email || !password || !name) {
+      setError("Todos os campos são obrigatórios.");
+      return false;
+    }
+    if (!validatePassword(password)) {
+      setPasswordError(
+        "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
+      );
+      return false;
+    }
+    setPasswordError(null);
+    return true;
+  };
+
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -34,13 +58,10 @@ const Register = () => {
     userPool.signUp(email, password, attributeList, [], (err, result) => {
       setLoading(false);
       if (err) {
-        setError("Erro ao cadastrar. Verifique os dados.");
+        setError(err.message || "Erro ao cadastrar. Verifique os dados.");
         return;
       }
-      console.log("Usuário cadastrado:", result);
       setSuccess(true);
-
-      // Redireciona para a página de verificação com o e-mail como parâmetro
       router.push(`/verify?email=${encodeURIComponent(email)}`);
     });
   };
@@ -76,18 +97,36 @@ const Register = () => {
             type="password"
             placeholder="Senha"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (!validatePassword(e.target.value)) {
+                setPasswordError(
+                  "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
+                );
+              } else {
+                setPasswordError(null);
+              }
+            }}
             required
-            className="w-full p-2 mb-4 bg-gray-700 rounded"
+            className="w-full p-2 mb-2 bg-gray-700 rounded"
           />
+          {passwordError && (
+            <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+          )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 text-white rounded p-2"
+            className="w-full bg-green-500 text-white rounded p-2 mt-4"
           >
             {loading ? "Cadastrando..." : "Cadastrar"}
           </button>
         </form>
+        <p className="mt-4 text-center">
+          Já possui uma conta?{" "}
+          <Link href="/login" className="text-blue-500 hover:underline">
+            Faça login
+          </Link>
+        </p>
       </div>
     </div>
   );

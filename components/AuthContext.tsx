@@ -1,3 +1,4 @@
+// /components/AuthContext.tsx
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
@@ -14,21 +15,32 @@ interface AuthContextType {
   user: CognitoUser | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  isAuthenticated: boolean; // Novo campo para verificar autenticação
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<CognitoUser | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado para autenticação
 
+  // Verifica a sessão do usuário ao carregar a página
   useEffect(() => {
     const cognitoUser = userPool.getCurrentUser();
+
     if (cognitoUser) {
       cognitoUser.getSession((err: any, session: any) => {
         if (!err && session.isValid()) {
           setUser(cognitoUser);
+          setIsAuthenticated(true); // Usuário autenticado
+        } else {
+          setUser(null);
+          setIsAuthenticated(false); // Sessão inválida
         }
       });
+    } else {
+      setUser(null);
+      setIsAuthenticated(false); // Nenhum usuário logado
     }
   }, []);
 
@@ -47,11 +59,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (result) => {
           setUser(cognitoUser);
-          console.log("Logged in!", result);
+          setIsAuthenticated(true); // Atualiza o estado imediatamente
           resolve();
         },
         onFailure: (err) => {
-          console.error("Login error", err);
+          setUser(null);
+          setIsAuthenticated(false);
           reject(err);
         },
       });
@@ -59,14 +72,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = () => {
-    if (user) {
-      user.signOut();
-      setUser(null);
+    const cognitoUser = userPool.getCurrentUser();
+    if (cognitoUser) {
+      cognitoUser.signOut(); // Encerra a sessão no Cognito
     }
+    setUser(null);
+    setIsAuthenticated(false); // Limpa o estado de autenticação
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

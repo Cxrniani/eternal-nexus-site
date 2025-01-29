@@ -1,9 +1,10 @@
+// /app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { AuthProvider } from "@/components/AuthContext"; // Importa o AuthProvider
+import { AuthProvider } from "@/components/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,6 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-top bg-contain bg-no-repeat bg-preto-opaco">
         <AuthProvider>
-          {/* Agora todo o app tem acesso ao usuário autenticado */}
           <Navbar />
           <main className="relative overflow-hidden text-white">
             {children}

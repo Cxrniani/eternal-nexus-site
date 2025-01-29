@@ -1,3 +1,4 @@
+// /components/AnimatedComponent.client.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -8,7 +9,9 @@ const animationVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const AnimatedComponent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AnimatedComponent: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   return (
     <motion.div
       initial="hidden"

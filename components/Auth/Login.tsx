@@ -1,54 +1,65 @@
+// /components/Auth/Login.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   CognitoUserPool,
   CognitoUser,
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
-import { poolData } from "@/cognitoConfig"; // Certifique-se de que isso está correto
-import { useRouter } from "next/navigation"; // Para redirecionamento no Next.js
+import { poolData } from "@/cognitoConfig";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/components/AuthContext";
 
-const userPool = new CognitoUserPool(poolData); // Criando o pool de usuários com os dados de configuração
+const userPool = new CognitoUserPool(poolData);
 
 const Login = () => {
-  const router = useRouter(); // Usando o router do Next.js para redirecionamento
+  const router = useRouter();
+  const { login, isAuthenticated } = useAuth(); // Verifica se o usuário já está autenticado
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard"); // Redireciona para o dashboard se já estiver autenticado
+    }
+  }, [isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Autenticação com a SDK do AWS Cognito
-    const userData = {
-      Username: email, // Nome de usuário (pode ser o email dependendo da sua configuração)
-      Pool: userPool, // A referência do seu pool de usuários
-    };
+    try {
+      await login(email, password); // Agora a função login será encontrada corretamente
+      router.push("/dashboard");
+    } catch (err) {
+      setError("Erro ao fazer login. Verifique suas credenciais.");
+      setLoading(false);
+    }
 
-    const authenticationData = {
-      Username: email, // Nome de usuário
-      Password: password, // Senha
-    };
+    const authenticationDetails = new AuthenticationDetails({
+      Username: email,
+      Password: password,
+    });
 
-    const authenticationDetails = new AuthenticationDetails(authenticationData);
-    const cognitoUser = new CognitoUser(userData);
+    const cognitoUser = new CognitoUser({
+      Username: email,
+      Pool: userPool,
+    });
 
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: (result) => {
-        console.log("Login realizado com sucesso:", result);
-        router.push("/dashboard"); // Redireciona após login bem-sucedido
+        router.push("/dashboard");
       },
       onFailure: (err) => {
-        console.error("Erro ao fazer login:", err);
         setError("Erro ao fazer login. Verifique suas credenciais.");
+        setLoading(false);
       },
     });
-
-    setLoading(false); // Finaliza o carregamento
   };
 
   return (
@@ -81,6 +92,20 @@ const Login = () => {
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <Link
+            href="/forgot-password"
+            className="text-blue-500 hover:underline"
+          >
+            Esqueci minha senha
+          </Link>
+        </div>
+        <p className="mt-4 text-center">
+          Não possui uma conta?{" "}
+          <Link href="/register" className="text-blue-500 hover:underline">
+            Registrar-se
+          </Link>
+        </p>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+// /components/ProtectedRoute.tsx
 import React from "react";
 import { useRouter } from "next/navigation"; // Next.js Router
 import { useAuth } from "../components/AuthContext";
