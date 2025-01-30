@@ -12,6 +12,8 @@ const PaymentPage = () => {
     const [mp, setMp] = useState<any>(null);
     const [pixCode, setPixCode] = useState<string | null>(null); // Estado para armazenar o código PIX
     const [qrCodeImage, setQrCodeImage] = useState<string | null>(null); // Estado para armazenar o QR Code
+    const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutos em segundos
+    const [isExpired, setIsExpired] = useState<boolean>(false); // Estado para verificar se o tempo expirou
     const ticketLot = searchParams.get("lot");
     const quantity = Number(searchParams.get("quantity"));
     const paymentMethod = searchParams.get("method");
@@ -20,16 +22,55 @@ const PaymentPage = () => {
     // Função para copiar o código PIX
     const copyPixCode = () => {
         if (pixCode) {
-            navigator.clipboard.writeText(pixCode)
-                .then(() => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(pixCode)
+                    .then(() => {
+                        alert("Código PIX copiado para a área de transferência!");
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao copiar o código PIX:", error);
+                        alert("Erro ao copiar o código PIX. Tente novamente.");
+                    });
+            } else {
+                // Fallback para navegadores que não suportam a API clipboard
+                const textArea = document.createElement("textarea");
+                textArea.value = pixCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand("copy");
                     alert("Código PIX copiado para a área de transferência!");
-                })
-                .catch((error) => {
+                } catch (error) {
                     console.error("Erro ao copiar o código PIX:", error);
                     alert("Erro ao copiar o código PIX. Tente novamente.");
-                });
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
         }
     };
+
+    // Função para formatar o tempo restante em MM:SS
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+    };
+
+    // Efeito para o timer
+    useEffect(() => {
+        if (timeLeft > 0 && qrCodeImage) {
+            const timer = setTimeout(() => {
+                setTimeLeft(timeLeft - 1);
+            }, 1000);
+
+            return () => clearTimeout(timer);
+        } else if (timeLeft === 0) {
+            setIsExpired(true); // Tempo expirado
+            setQrCodeImage(null); // Remove o QR Code
+            setPixCode(null); // Remove o código PIX
+        }
+    }, [timeLeft, qrCodeImage]);
 
     // Verifica se os parâmetros necessários estão presentes
     useEffect(() => {
@@ -186,7 +227,7 @@ const PaymentPage = () => {
                 <div className="flex w-full">
                     <div className="flex flex-col justify-center w-full">
                         <h1 className="py-5 text-2xl font-extrabold text-center text-white">
-                            Pagamento
+                            Checkout - {quantity}x Ingresso {ticketLot}º Lote <br />Total: R$ {totalAmount.toFixed(2)}
                         </h1>
 
                         {/* Formulário de cartão */}
@@ -299,6 +340,10 @@ const PaymentPage = () => {
 
                                                     // Exibir o código PIX copia e cola
                                                     setPixCode(result.pix_copia_cola);
+
+                                                    // Iniciar o timer de 5 minutos
+                                                    setTimeLeft(300);
+                                                    setIsExpired(false);
                                                 }
                                             } else {
                                                 alert(`Erro no pagamento PIX: ${result.error}`);
@@ -338,8 +383,9 @@ const PaymentPage = () => {
                                     </div>
 
                                     {/* Container para o QR Code */}
-                                    {qrCodeImage && (
-                                        <div id="pix-qr-code-container" className="flex justify-center">
+                                    {qrCodeImage && !isExpired && (
+                                        <div id="pix-qr-code-container" className="flex justify-center flex-col items-center">
+                                            <p className="text-white mb-2">Tempo restante: {formatTime(timeLeft)}</p>
                                             <img
                                                 src={qrCodeImage}
                                                 alt="QR Code PIX"
@@ -349,7 +395,7 @@ const PaymentPage = () => {
                                     )}
 
                                     {/* Container para o código PIX copia e cola */}
-                                    {pixCode && (
+                                    {pixCode && !isExpired && (
                                         <div id="pix-copia-cola-container" className="mt-4">
                                             <div className="mt-4">
                                                 <p className="text-white">Código PIX (copia e cola):</p>
@@ -370,6 +416,13 @@ const PaymentPage = () => {
                                                     </button>
                                                 </div>
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {/* Mensagem de tempo expirado */}
+                                    {isExpired && (
+                                        <div className="mt-4 text-center text-red-500">
+                                            <p>O tempo para realizar o pagamento PIX expirou. Por favor, gere um novo QR Code.</p>
                                         </div>
                                     )}
                                 </form>
