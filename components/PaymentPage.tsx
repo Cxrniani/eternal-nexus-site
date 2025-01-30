@@ -10,10 +10,26 @@ const PaymentPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [mp, setMp] = useState<any>(null);
+    const [pixCode, setPixCode] = useState<string | null>(null); // Estado para armazenar o código PIX
+    const [qrCodeImage, setQrCodeImage] = useState<string | null>(null); // Estado para armazenar o QR Code
     const ticketLot = searchParams.get("lot");
     const quantity = Number(searchParams.get("quantity"));
     const paymentMethod = searchParams.get("method");
     const totalAmount = 37.80 * quantity; // Valor total calculado
+
+    // Função para copiar o código PIX
+    const copyPixCode = () => {
+        if (pixCode) {
+            navigator.clipboard.writeText(pixCode)
+                .then(() => {
+                    alert("Código PIX copiado para a área de transferência!");
+                })
+                .catch((error) => {
+                    console.error("Erro ao copiar o código PIX:", error);
+                    alert("Erro ao copiar o código PIX. Tente novamente.");
+                });
+        }
+    };
 
     // Verifica se os parâmetros necessários estão presentes
     useEffect(() => {
@@ -23,6 +39,7 @@ const PaymentPage = () => {
         }
     }, [ticketLot, quantity, paymentMethod, router]);
 
+    // Lógica para inicializar o SDK do Mercado Pago (pagamento com cartão)
     useEffect(() => {
         if (paymentMethod === "card") {
             const initializeMercadoPagoSDK = async () => {
@@ -144,7 +161,6 @@ const PaymentPage = () => {
                                         alert("Ocorreu um erro ao processar o pagamento. Tente novamente.");
                                     });
                             },
-
                             onFetching: (resource: string) => {
                                 console.log("Recurso sendo buscado:", resource);
                                 const progressBar = document.querySelector(".progress-bar");
@@ -251,8 +267,48 @@ const PaymentPage = () => {
                                 <form
                                     id="form-pix"
                                     className="flex flex-col space-y-4 px-4 md:px-[25%] mt-4"
+                                    onSubmit={async (event) => {
+                                        event.preventDefault();
+
+                                        const pixData = {
+                                            cardholderEmail: (document.getElementById("pix-email") as HTMLInputElement).value,
+                                            identificationNumber: (document.getElementById("pix-cpf") as HTMLInputElement).value,
+                                            identificationType: "CPF",
+                                            transaction_amount: totalAmount,
+                                            firstName: (document.getElementById("pix-name") as HTMLInputElement).value.split(" ")[0],
+                                            lastName: (document.getElementById("pix-name") as HTMLInputElement).value.split(" ").slice(1).join(" "),
+                                        };
+
+                                        try {
+                                            const response = await fetch("http://127.0.0.1:5000/process_payment_pix", {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                },
+                                                body: JSON.stringify(pixData),
+                                            });
+
+                                            const result = await response.json();
+
+                                            if (result.success) {
+                                                if (result.status === "pending") {
+                                                    alert("Pagamento PIX gerado com sucesso! Escaneie o QR Code ou copie o código PIX para concluir o pagamento.");
+
+                                                    // Exibir o QR Code na tela
+                                                    setQrCodeImage(`data:image/png;base64,${result.pix_qr_code_base64}`);
+
+                                                    // Exibir o código PIX copia e cola
+                                                    setPixCode(result.pix_copia_cola);
+                                                }
+                                            } else {
+                                                alert(`Erro no pagamento PIX: ${result.error}`);
+                                            }
+                                        } catch (error) {
+                                            console.error("Erro na requisição:", error);
+                                            alert("Ocorreu um erro ao processar o pagamento PIX. Tente novamente.");
+                                        }
+                                    }}
                                 >
-                                    {/* Campos do formulário de PIX */}
                                     <input
                                         type="text"
                                         id="pix-name"
@@ -280,6 +336,42 @@ const PaymentPage = () => {
                                             Gerar QR Code PIX
                                         </button>
                                     </div>
+
+                                    {/* Container para o QR Code */}
+                                    {qrCodeImage && (
+                                        <div id="pix-qr-code-container" className="flex justify-center">
+                                            <img
+                                                src={qrCodeImage}
+                                                alt="QR Code PIX"
+                                                style={{ width: "200px", height: "200px" }}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Container para o código PIX copia e cola */}
+                                    {pixCode && (
+                                        <div id="pix-copia-cola-container" className="mt-4">
+                                            <div className="mt-4">
+                                                <p className="text-white">Código PIX (copia e cola):</p>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="text"
+                                                        id="pix-copia-cola"
+                                                        value={pixCode}
+                                                        readOnly
+                                                        className="w-full p-2 border text-black border-gray-500 rounded-sm"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={copyPixCode}
+                                                        className="bg-blue-500 text-white p-2 rounded"
+                                                    >
+                                                        Copiar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </form>
                             </div>
                         )}
