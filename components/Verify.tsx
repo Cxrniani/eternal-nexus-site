@@ -27,7 +27,7 @@ const Verify = () => {
     setSuccess(false);
 
     try {
-      const response = await fetch("http://localhost:5000/verify", {
+      const response = await fetch("http://127.0.0.1:5000/verify", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +52,7 @@ const Verify = () => {
 
   const handleResendCode = async () => {
     try {
-      const response = await fetch("http://localhost:5000/resend-code", {
+      const response = await fetch("http://127.0.0.1:5000/resend-code", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
