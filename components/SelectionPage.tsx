@@ -1,17 +1,54 @@
+// app/selecao-ingressos/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-const TICKET_PRICE = 37.80; // Valor unitário do ingresso
+interface Lote {
+    id: number;
+    nome: string;
+    descricao?: string;
+    valor: number;
+    quantidade: number;
+}
 
 const SelectionPage = () => {
     const router = useRouter();
-    const [ticketLot, setTicketLot] = useState<string>("1"); // Estado para o lote do ingresso
-    const [quantity, setQuantity] = useState<number>(1); // Estado para a quantidade de ingressos
-    const [paymentMethod, setPaymentMethod] = useState<string>(""); // Estado para o método de pagamento selecionado
-    const totalAmount = TICKET_PRICE * quantity; // Valor total calculado
+    const [lotes, setLotes] = useState<Lote[]>([]);
+    const [ticketLot, setTicketLot] = useState<string>("");
+    const [quantity, setQuantity] = useState<number>(1);
+    const [paymentMethod, setPaymentMethod] = useState<string>("");
+
+    // Busca os lotes da API
+    const fetchLotes = async () => {
+        try {
+            const response = await fetch("http://127.0.0.1:5000/lotes", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            if (!response.ok) {
+                throw new Error("Erro ao buscar lotes");
+            }
+            const data = await response.json();
+            setLotes(data);
+            if (data.length > 0) {
+                setTicketLot(data[0].id.toString()); // Seleciona o primeiro lote por padrão
+            }
+        } catch (error) {
+            console.error("Erro ao buscar lotes:", error);
+        }
+    };
+
+    // Busca os lotes ao carregar a página
+    useEffect(() => {
+        fetchLotes();
+    }, []);
+
+    const loteSelecionado = lotes.find((lote) => lote.id.toString() === ticketLot);
+    const totalAmount = loteSelecionado ? loteSelecionado.valor * quantity : 0;
 
     const handleProceedToPayment = () => {
         if (!paymentMethod) {
@@ -20,28 +57,30 @@ const SelectionPage = () => {
         }
 
         // Redireciona para a página de pagamento com os parâmetros necessários
-        router.push(`/payment?lot=${ticketLot}&quantity=${quantity}&method=${paymentMethod}`);
+        router.push(
+            `/payment?lot=${ticketLot}&quantity=${quantity}&method=${paymentMethod}&nome=${loteSelecionado?.nome}&valor=${loteSelecionado?.valor}`
+        );
     };
 
     return (
         <div className="w-full h-auto bg-slate-950">
-            <div className="max-container py-5 flex-row">
+            <div className="max-container flex-row">
                 <div className="flex w-full">
                     <div className="flex flex-col justify-center w-full">
-                        <h1 className="py-5 text-2xl font-extrabold text-center text-white">
-                            Checkout Ingresso
+                        <h1 className="pt-5 mx-auto md:py-5 text-5xl font-extrabold text-center text-white">
+                            Checkout
                         </h1>
-                        <div className="flex justify-center py-5">
-                            <div className="flex flex-col items-center">
-                                <div className="relative w-[100vh] h-80">
+                        <div className="w-full flex justify-center">
+                            <div className="w-full flex flex-col items-center">
+                                <div className="relative w-full h-[60vh]">
                                     <Image
-                                        src="/assets/concert-dance-disco-dubstep-wallpaper-preview.jpg"
+                                        src="https://placehold.co/1080x540.png"
                                         layout="fill"
-                                        objectFit="cover"
-                                        alt="Ingresso Eternal Nexus"
+                                        objectFit="contain"
+                                        alt="Cover Ingresso Eternal Nexus"
                                     />
                                 </div>
-                                <h1 className="text-white text-2xl font-extrabold py-5">Ingresso Eternal Nexus</h1>
+                                <h1 className="text-white text-4xl font-extrabold py-5">Selecione Seu Ingresso:</h1>
 
                                 {/* Seleção de Lote */}
                                 <div className="flex flex-col items-center gap-2 mb-4">
@@ -51,9 +90,11 @@ const SelectionPage = () => {
                                         onChange={(e) => setTicketLot(e.target.value)}
                                         className="p-2 border border-gray-500 rounded-sm text-black"
                                     >
-                                        <option value="1">1º Lote</option>
-                                        <option value="2">2º Lote</option>
-                                        <option value="3">3º Lote</option>
+                                        {lotes.map((lote) => (
+                                            <option key={lote.id} value={lote.id}>
+                                                {lote.nome} - R$ {lote.valor.toFixed(2)}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
