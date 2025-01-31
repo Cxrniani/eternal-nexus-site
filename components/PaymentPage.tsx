@@ -1,3 +1,4 @@
+// app/payment/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -10,47 +11,30 @@ const PaymentPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const [mp, setMp] = useState<any>(null);
-    const [pixCode, setPixCode] = useState<string | null>(null); // Estado para armazenar o código PIX
-    const [qrCodeImage, setQrCodeImage] = useState<string | null>(null); // Estado para armazenar o QR Code
-    const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutos em segundos
-    const [isExpired, setIsExpired] = useState<boolean>(false); // Estado para verificar se o tempo expirou
+    const [pixCode, setPixCode] = useState<string | null>(null);
+    const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
+    const [timeLeft, setTimeLeft] = useState<number>(300);
+    const [isExpired, setIsExpired] = useState<boolean>(false);
+
+    // Parâmetros da URL
     const ticketLot = searchParams.get("lot");
     const quantity = Number(searchParams.get("quantity"));
     const paymentMethod = searchParams.get("method");
-    const totalAmount = 37.80 * quantity; // Valor total calculado
+    const nomeLote = searchParams.get("nome");
+    const valorLote = Number(searchParams.get("valor"));
+
+    const totalAmount = valorLote * quantity; // Valor total calculado
 
     // Função para copiar o código PIX
     const copyPixCode = () => {
         if (pixCode) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(pixCode)
-                    .then(() => {
-                        alert("Código PIX copiado para a área de transferência!");
-                    })
-                    .catch((error) => {
-                        console.error("Erro ao copiar o código PIX:", error);
-                        alert("Erro ao copiar o código PIX. Tente novamente.");
-                    });
-            } else {
-                // Fallback para navegadores que não suportam a API clipboard
-                const textArea = document.createElement("textarea");
-                textArea.value = pixCode;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand("copy");
-                    alert("Código PIX copiado para a área de transferência!");
-                } catch (error) {
-                    console.error("Erro ao copiar o código PIX:", error);
-                    alert("Erro ao copiar o código PIX. Tente novamente.");
-                } finally {
-                    document.body.removeChild(textArea);
-                }
-            }
+            navigator.clipboard.writeText(pixCode)
+                .then(() => alert("Código PIX copiado para a área de transferência!"))
+                .catch(() => alert("Erro ao copiar o código PIX. Tente novamente."));
         }
     };
 
-    // Função para formatar o tempo restante em MM:SS
+    // Função para formatar o tempo restante
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
@@ -60,25 +44,22 @@ const PaymentPage = () => {
     // Efeito para o timer
     useEffect(() => {
         if (timeLeft > 0 && qrCodeImage) {
-            const timer = setTimeout(() => {
-                setTimeLeft(timeLeft - 1);
-            }, 1000);
-
+            const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
             return () => clearTimeout(timer);
         } else if (timeLeft === 0) {
-            setIsExpired(true); // Tempo expirado
-            setQrCodeImage(null); // Remove o QR Code
-            setPixCode(null); // Remove o código PIX
+            setIsExpired(true);
+            setQrCodeImage(null);
+            setPixCode(null);
         }
     }, [timeLeft, qrCodeImage]);
 
     // Verifica se os parâmetros necessários estão presentes
     useEffect(() => {
-        if (!ticketLot || !quantity || !paymentMethod) {
+        if (!ticketLot || !quantity || !paymentMethod || !nomeLote || !valorLote) {
             alert("Por favor, selecione o lote, a quantidade e a forma de pagamento.");
-            router.push("/selection"); // Redireciona para a página de seleção
+            router.push("/selection");
         }
-    }, [ticketLot, quantity, paymentMethod, router]);
+    }, [ticketLot, quantity, paymentMethod, nomeLote, valorLote, router]);
 
     // Lógica para inicializar o SDK do Mercado Pago (pagamento com cartão)
     useEffect(() => {
@@ -90,7 +71,7 @@ const PaymentPage = () => {
                     setMp(mercadoPago);
 
                     const cardForm = mercadoPago.cardForm({
-                        amount: totalAmount.toString(), // Valor do pagamento
+                        amount: totalAmount.toString(),
                         iframe: true,
                         form: {
                             id: "form-checkout",
@@ -133,7 +114,7 @@ const PaymentPage = () => {
                         },
                         callbacks: {
                             onFormMounted: (error: Error | undefined) => {
-                                if (error) return (console.error("Erro ao montar formulário:", error), alert("Erro ao montar formulário. Tente novamente."));
+                                if (error) return console.error("Erro ao montar formulário:", error);
                                 console.log("Formulário montado com sucesso!");
                             },
                             onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
@@ -149,13 +130,11 @@ const PaymentPage = () => {
                                     cardholderEmail,
                                 } = cardForm.getCardFormData();
 
-                                // Validação dos campos obrigatórios
                                 if (!token || !paymentMethodId || !issuerId || !installments || !identificationNumber || !identificationType || !cardholderEmail) {
                                     alert("Por favor, preencha todos os campos corretamente.");
                                     return;
                                 }
 
-                                // Dados para enviar ao back-end
                                 const paymentData = {
                                     token,
                                     paymentMethodId,
@@ -164,12 +143,11 @@ const PaymentPage = () => {
                                     identificationNumber,
                                     identificationType,
                                     cardholderEmail,
-                                    transaction_amount: totalAmount, // Valor total
-                                    ticketLot, // Lote do ingresso
-                                    quantity, // Quantidade de ingressos
+                                    transaction_amount: totalAmount,
+                                    ticketLot,
+                                    quantity,
                                 };
 
-                                // Envia a requisição para o back-end
                                 fetch("http://127.0.0.1:5000/process_payment", {
                                     method: "POST",
                                     headers: {
@@ -180,16 +158,14 @@ const PaymentPage = () => {
                                     .then((response) => response.json())
                                     .then((result) => {
                                         if (result.success) {
-                                            // Tratamento dos status de sucesso
                                             if (result.status === "approved") {
                                                 alert("Pagamento aprovado! Redirecionando para a página de confirmação...");
-                                                window.location.href = "/payment/pagamento-aprovado"; // Redireciona para a página de pagamento aprovado
+                                                window.location.href = "pagamento-aprovado";
                                             } else if (result.status === "in_process" || result.status === "pending") {
                                                 alert("Seu pagamento está em processamento. Você receberá uma confirmação por e-mail.");
-                                                window.location.href = "/payment/pagamento-em-analise"; // Redireciona para a página de pagamento em análise
+                                                window.location.href = "/pagamento-pendente";
                                             }
                                         } else {
-                                            // Tratamento de erros
                                             if (result.status === "rejected") {
                                                 alert("Pagamento rejeitado. Por favor, tente novamente com outro método de pagamento.");
                                             } else {
@@ -227,7 +203,7 @@ const PaymentPage = () => {
                 <div className="flex w-full">
                     <div className="flex flex-col justify-center w-full">
                         <h1 className="py-5 text-2xl font-extrabold text-center text-white">
-                            Checkout - {quantity}x Ingresso {ticketLot}º Lote <br />Total: R$ {totalAmount.toFixed(2)}
+                            Checkout - {quantity}x Ingresso {nomeLote} <br />Total: R$ {totalAmount.toFixed(2)}
                         </h1>
 
                         {/* Formulário de cartão */}
@@ -335,13 +311,8 @@ const PaymentPage = () => {
                                                 if (result.status === "pending") {
                                                     alert("Pagamento PIX gerado com sucesso! Escaneie o QR Code ou copie o código PIX para concluir o pagamento.");
 
-                                                    // Exibir o QR Code na tela
                                                     setQrCodeImage(`data:image/png;base64,${result.pix_qr_code_base64}`);
-
-                                                    // Exibir o código PIX copia e cola
                                                     setPixCode(result.pix_copia_cola);
-
-                                                    // Iniciar o timer de 5 minutos
                                                     setTimeLeft(300);
                                                     setIsExpired(false);
                                                 }
