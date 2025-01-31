@@ -2,17 +2,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  CognitoUserPool,
-  CognitoUser,
-  AuthenticationDetails,
-} from "amazon-cognito-identity-js";
-import { poolData } from "@/cognitoConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
-
-const userPool = new CognitoUserPool(poolData);
 
 const Login = () => {
   const router = useRouter();
@@ -34,32 +26,31 @@ const Login = () => {
     setError(null);
 
     try {
-      await login(email, password); // Agora a função login será encontrada corretamente
-      router.push("/dashboard");
+      // Verifique se o e-mail já está registrado usando fetch
+      const response = await fetch("http://127.0.0.1:5000/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.exists) {
+        // Caso o e-mail esteja registrado, tente fazer login
+        await login(email, password);
+        router.push("/dashboard");
+      } else {
+        // Caso contrário, redirecione para a página de registro
+        setError("E-mail não encontrado. Redirecionando para o registro...");
+        router.push("/register");
+      }
     } catch (err) {
       setError("Erro ao fazer login. Verifique suas credenciais.");
+    } finally {
       setLoading(false);
     }
-
-    const authenticationDetails = new AuthenticationDetails({
-      Username: email,
-      Password: password,
-    });
-
-    const cognitoUser = new CognitoUser({
-      Username: email,
-      Pool: userPool,
-    });
-
-    cognitoUser.authenticateUser(authenticationDetails, {
-      onSuccess: (result) => {
-        router.push("/dashboard");
-      },
-      onFailure: (err) => {
-        setError("Erro ao fazer login. Verifique suas credenciais.");
-        setLoading(false);
-      },
-    });
   };
 
   return (

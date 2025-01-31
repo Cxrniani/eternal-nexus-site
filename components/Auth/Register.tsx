@@ -2,15 +2,10 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  CognitoUserPool,
-  CognitoUserAttribute,
-} from "amazon-cognito-identity-js";
+
 import { poolData } from "@/cognitoConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-const userPool = new CognitoUserPool(poolData);
 
 const Register = () => {
   const router = useRouter();
@@ -22,10 +17,17 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Estados para as validações da senha
+  const [hasUpperCase, setHasUpperCase] = useState(false);
+  const [hasLowerCase, setHasLowerCase] = useState(false);
+  const [hasNumber, setHasNumber] = useState(false);
+  const [hasSpecialChar, setHasSpecialChar] = useState(false);
+
   const validatePassword = (password: string) => {
-    const regex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-    return regex.test(password);
+    setHasUpperCase(/[A-Z]/.test(password));
+    setHasLowerCase(/[a-z]/.test(password));
+    setHasNumber(/\d/.test(password));
+    setHasSpecialChar(/[!@#$%^&*(),.?":{}|<>]/.test(password));
   };
 
   const validateForm = () => {
@@ -33,7 +35,7 @@ const Register = () => {
       setError("Todos os campos são obrigatórios.");
       return false;
     }
-    if (!validatePassword(password)) {
+    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
       setPasswordError(
         "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
       );
@@ -43,7 +45,7 @@ const Register = () => {
     return true;
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -51,19 +53,41 @@ const Register = () => {
     setError(null);
     setSuccess(false);
 
-    const attributeList = [
-      new CognitoUserAttribute({ Name: "name", Value: name }),
-    ];
+    try {
+      // Passo 1: Verificar e-mail
+      const checkResponse = await fetch("http://localhost:5000/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-    userPool.signUp(email, password, attributeList, [], (err, result) => {
-      setLoading(false);
-      if (err) {
-        setError(err.message || "Erro ao cadastrar. Verifique os dados.");
+      const checkData = await checkResponse.json();
+
+      if (checkData.exists) {
+        setError("Este e-mail já está registrado.");
         return;
       }
+
+      // Passo 2: Registrar via API Flask
+      const registerResponse = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok) {
+        throw new Error(registerData.error || "Erro ao registrar");
+      }
+
       setSuccess(true);
       router.push(`/verify?email=${encodeURIComponent(email)}`);
-    });
+    } catch (err) {
+      setError("Erro ao registrar. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,20 +123,36 @@ const Register = () => {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (!validatePassword(e.target.value)) {
-                setPasswordError(
-                  "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
-                );
-              } else {
-                setPasswordError(null);
-              }
+              validatePassword(e.target.value);
             }}
             required
             className="w-full p-2 mb-2 bg-gray-700 rounded"
           />
+
+          {/* Pop-up de requisitos de senha */}
+          <div className="mt-2 text-sm">
+            <ul>
+              <li className={hasUpperCase ? "text-green-500" : "text-gray-500"}>
+                Deve conter uma letra maiúscula
+              </li>
+              <li className={hasLowerCase ? "text-green-500" : "text-gray-500"}>
+                Deve conter uma letra minúscula
+              </li>
+              <li className={hasNumber ? "text-green-500" : "text-gray-500"}>
+                Deve conter um número
+              </li>
+              <li
+                className={hasSpecialChar ? "text-green-500" : "text-gray-500"}
+              >
+                Deve conter um caractere especial
+              </li>
+            </ul>
+          </div>
+
           {passwordError && (
             <p className="text-red-500 text-sm mt-1">{passwordError}</p>
           )}
+
           <button
             type="submit"
             disabled={loading}

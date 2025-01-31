@@ -27,7 +27,7 @@ export const Navbar = () => {
         </ul>
         <div className="lg:flexCenter hidden">
           {/* Botão Entrar como link */}
-          <Link href="/login">
+          <Link href="/check-email">
             <Button
               type="button"
               title="Entrar"
