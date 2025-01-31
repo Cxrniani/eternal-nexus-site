@@ -1,8 +1,6 @@
-// /components/Auth/Register.tsx
 "use client";
 
 import React, { useState } from "react";
-
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -21,22 +19,32 @@ const Register = () => {
   const [hasLowerCase, setHasLowerCase] = useState(false);
   const [hasNumber, setHasNumber] = useState(false);
   const [hasSpecialChar, setHasSpecialChar] = useState(false);
+  const [hasMinLength, setHasMinLength] = useState(false);
 
+  // Função para validar a senha
   const validatePassword = (password: string) => {
     setHasUpperCase(/[A-Z]/.test(password));
     setHasLowerCase(/[a-z]/.test(password));
     setHasNumber(/\d/.test(password));
     setHasSpecialChar(/[!@#$%^&*(),.?":{}|<>]/.test(password));
+    setHasMinLength(password.length >= 8);
   };
 
+  // Função para validar o formulário
   const validateForm = () => {
     if (!email || !password || !name) {
       setError("Todos os campos são obrigatórios.");
       return false;
     }
-    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+    if (
+      !hasUpperCase ||
+      !hasLowerCase ||
+      !hasNumber ||
+      !hasSpecialChar ||
+      !hasMinLength
+    ) {
       setPasswordError(
-        "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
+        "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial."
       );
       return false;
     }
@@ -44,6 +52,7 @@ const Register = () => {
     return true;
   };
 
+  // Função para lidar com o registro
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -83,7 +92,11 @@ const Register = () => {
       setSuccess(true);
       router.push(`/verify?email=${encodeURIComponent(email)}`);
     } catch (err) {
-      setError("Erro ao registrar. Tente novamente.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao registrar. Tente novamente."
+      );
     } finally {
       setLoading(false);
     }
@@ -144,6 +157,9 @@ const Register = () => {
                 className={hasSpecialChar ? "text-green-500" : "text-gray-500"}
               >
                 Deve conter um caractere especial
+              </li>
+              <li className={hasMinLength ? "text-green-500" : "text-gray-500"}>
+                Deve ter pelo menos 8 caracteres
               </li>
             </ul>
           </div>

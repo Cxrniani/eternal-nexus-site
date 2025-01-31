@@ -1,4 +1,3 @@
-// /app/dashboard/page.tsx
 "use client";
 
 import { useAuth } from "@/components/AuthContext";
@@ -18,16 +17,11 @@ const DashboardPage = () => {
     }
 
     if (user) {
-      user.getUserAttributes((err, attributes) => {
-        if (err) {
-          console.error("Erro ao pegar atributos", err);
-        } else {
-          const emailAttr = attributes?.find((attr) => attr.Name === "email");
-          const nameAttr = attributes?.find((attr) => attr.Name === "name");
-          setEmail(emailAttr?.Value || null);
-          setName(nameAttr?.Value || null);
-        }
-      });
+      // Extrai os atributos do usuário diretamente do objeto `user`
+      const emailAttr = user.UserAttributes?.find((attr: any) => attr.Name === "email");
+      const nameAttr = user.UserAttributes?.find((attr: any) => attr.Name === "name");
+      setEmail(emailAttr?.Value || null);
+      setName(nameAttr?.Value || null);
     }
   }, [user, isAuthenticated, router]);
 

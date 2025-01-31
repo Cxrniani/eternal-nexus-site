@@ -1,4 +1,3 @@
-// /components/Auth/Login.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -8,7 +7,7 @@ import { useAuth } from "@/components/AuthContext";
 
 const Login = () => {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth(); // Verifica se o usuário já está autenticado
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +15,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard"); // Redireciona para o dashboard se já estiver autenticado
+      router.push("/dashboard");
     }
   }, [isAuthenticated, router]);
 
@@ -26,7 +25,6 @@ const Login = () => {
     setError(null);
 
     try {
-      // Verifique se o e-mail já está registrado usando fetch
       const response = await fetch("http://127.0.0.1:5000/check-email", {
         method: "POST",
         headers: {
@@ -38,11 +36,9 @@ const Login = () => {
       const data = await response.json();
 
       if (data.exists) {
-        // Caso o e-mail esteja registrado, tente fazer login
         await login(email, password);
         router.push("/dashboard");
       } else {
-        // Caso contrário, redirecione para a página de registro
         setError("E-mail não encontrado. Redirecionando para o registro...");
         router.push("/register");
       }

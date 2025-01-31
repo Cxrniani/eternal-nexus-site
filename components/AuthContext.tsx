@@ -1,83 +1,101 @@
-// /components/AuthContext.tsx
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import {
-  CognitoUserPool,
-  CognitoUser,
-  AuthenticationDetails,
-} from "amazon-cognito-identity-js";
-import { poolData } from "@/cognitoConfig";
-
-const userPool = new CognitoUserPool(poolData);
 
 interface AuthContextType {
-  user: CognitoUser | null;
+  user: any;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  isAuthenticated: boolean; // Novo campo para verificar autenticação
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<CognitoUser | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Estado para autenticação
+  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Verifica a sessão do usuário ao carregar a página
-  useEffect(() => {
-    const cognitoUser = userPool.getCurrentUser();
-
-    if (cognitoUser) {
-      cognitoUser.getSession((err: any, session: any) => {
-        if (!err && session.isValid()) {
-          setUser(cognitoUser);
-          setIsAuthenticated(true); // Usuário autenticado
-        } else {
-          setUser(null);
-          setIsAuthenticated(false); // Sessão inválida
-        }
-      });
-    } else {
+  // Função para restaurar a sessão ao carregar a página
+  const restoreSession = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    if (!accessToken) {
       setUser(null);
-      setIsAuthenticated(false); // Nenhum usuário logado
+      setIsAuthenticated(false);
+      return;
     }
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/user", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData.data);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  };
+
+  // Restaura a sessão ao carregar a página
+  useEffect(() => {
+    restoreSession();
   }, []);
 
   const login = async (email: string, password: string) => {
-    return new Promise<void>((resolve, reject) => {
-      const authenticationDetails = new AuthenticationDetails({
-        Username: email,
-        Password: password,
+    try {
+      const response = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      const cognitoUser = new CognitoUser({
-        Username: email,
-        Pool: userPool,
-      });
-
-      cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: (result) => {
-          setUser(cognitoUser);
-          setIsAuthenticated(true); // Atualiza o estado imediatamente
-          resolve();
-        },
-        onFailure: (err) => {
-          setUser(null);
-          setIsAuthenticated(false);
-          reject(err);
-        },
-      });
-    });
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("access_token", data.data.AuthenticationResult.AccessToken);
+        setUser(data.data);
+        setIsAuthenticated(true);
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error);
+      }
+    } catch (error) {
+      setUser(null);
+      setIsAuthenticated(false);
+      throw error;
+    }
   };
 
-  const logout = () => {
-    const cognitoUser = userPool.getCurrentUser();
-    if (cognitoUser) {
-      cognitoUser.signOut(); // Encerra a sessão no Cognito
+  const logout = async () => {
+    try {
+      const accessToken = localStorage.getItem("access_token");
+      if (accessToken) {
+        await fetch("http://127.0.0.1:5000/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+    } finally {
+      localStorage.removeItem("access_token");
+      setUser(null);
+      setIsAuthenticated(false);
     }
-    setUser(null);
-    setIsAuthenticated(false); // Limpa o estado de autenticação
   };
 
   return (
