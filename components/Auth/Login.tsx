@@ -13,6 +13,7 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Redireciona para o dashboard se o usuário já estiver autenticado
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/dashboard");
