@@ -3,7 +3,6 @@
 
 import React, { useState } from "react";
 
-import { poolData } from "@/cognitoConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
