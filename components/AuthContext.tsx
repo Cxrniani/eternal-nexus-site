@@ -15,6 +15,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  useEffect(() => {
+    restoreSession();
+}, []);
+
   // Função para restaurar a sessão ao carregar a página
   const restoreSession = async () => {
     const accessToken = localStorage.getItem("access_token");
@@ -53,32 +57,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch("http://127.0.0.1:5000/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("access_token", data.data.AuthenticationResult.AccessToken);
-        setUser({
-          ...data.data,  // Inclui o user_id na resposta
-          id: data.data.user_id,  // Armazena o user_id
+        const response = await fetch("http://127.0.0.1:5000/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
         });
-        setIsAuthenticated(true);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error);
-      }
+
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem("access_token", data.data.AuthenticationResult.AccessToken);
+
+            // Atualiza o estado do usuário
+            setUser({
+                ...data.data,  // Inclui o user_id na resposta
+                id: data.data.user_id,  // Armazena o user_id
+            });
+            setIsAuthenticated(true);
+
+            // Retorna os dados do usuário para indicar que o login foi concluído
+            return data.data;
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.error);
+        }
     } catch (error) {
-      setUser(null);
-      setIsAuthenticated(false);
-      throw error;
+        setUser(null);
+        setIsAuthenticated(false);
+        throw error;
     }
-  };
+};
 
   const logout = async () => {
     try {

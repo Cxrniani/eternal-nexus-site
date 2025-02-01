@@ -37,7 +37,10 @@ const Login = () => {
       const data = await response.json();
 
       if (data.exists) {
+        // Aguarda a conclusão do login e a atualização do estado `user`
         await login(email, password);
+
+        // Redireciona para o dashboard após o login ser concluído
         router.push("/dashboard");
       } else {
         setError("E-mail não encontrado. Redirecionando para o registro...");

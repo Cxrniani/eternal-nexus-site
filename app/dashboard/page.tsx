@@ -1,10 +1,9 @@
-// app/dashboard/page.tsx
 "use client";
 
 import { useAuth } from "@/components/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {QRCodeSVG} from "qrcode.react"; // Importe o componente QRCode
+import { QRCodeSVG } from "qrcode.react";
 
 const DashboardPage = () => {
     const { user, isAuthenticated, logout } = useAuth();
@@ -12,35 +11,57 @@ const DashboardPage = () => {
     const [email, setEmail] = useState<string | null>(null);
     const [name, setName] = useState<string | null>(null);
     const [tickets, setTickets] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // ✅ Força um reload após 200ms se ainda estiver carregando
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (loading) {
+                window.location.reload();
+            }
+        }, 200); // 200ms
+
+        return () => clearTimeout(timeout); // Limpa o timeout ao desmontar o componente
+    }, [loading]);
 
     useEffect(() => {
         if (!isAuthenticated) {
-            router.push("/login"); // Redireciona para o login se o usuário não estiver autenticado
+            router.push("/login");
             return;
         }
 
-        if (user) {
-            // Extrai os atributos do usuário diretamente do objeto `user`
-            const emailAttr = user.UserAttributes?.find((attr: any) => attr.Name === "email");
-            const nameAttr = user.UserAttributes?.find((attr: any) => attr.Name === "name");
+        if (user && user.UserAttributes) {
+            const emailAttr = user.UserAttributes.find((attr: any) => attr.Name === "email");
+            const nameAttr = user.UserAttributes.find((attr: any) => attr.Name === "name");
             setEmail(emailAttr?.Value || null);
             setName(nameAttr?.Value || null);
 
-            // Buscar os tickets do usuário
-            fetch(`http://127.0.0.1:3000/user_tickets/${user.UserAttributes[3].Value}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-                .then((response) => response.json())
-                .then((data) => setTickets(data))
-                .catch((error) => console.error("Erro ao buscar tickets:", error));
-        }
-    }, [user, isAuthenticated, router]);
+            if (user.UserAttributes.length > 3) {
+                const userId = user.UserAttributes[3].Value;
 
-    if (!isAuthenticated) {
-        return null; // Não renderiza nada se o usuário não estiver autenticado
+                fetch(`http://127.0.0.1:3000/user_tickets/${userId}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        setTickets(data);
+                        setLoading(false);
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao buscar tickets:", error);
+                        setLoading(false);
+                    });
+            } else {
+                console.error("UserAttributes não definidos corretamente.");
+                setLoading(false);
+            }
+        }
+    }, [isAuthenticated, user]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+                Carregando...
+            </div>
+        );
     }
 
     return (
