@@ -22,7 +22,7 @@ const FormularioLote = () => {
     // Função para buscar lotes da API
     const fetchLotes = async () => {
         try {
-            const response = await fetch("http://127.0.0.1:5000/lotes", {
+            const response = await fetch("http://127.0.0.1:3000/lotes", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -53,7 +53,7 @@ const FormularioLote = () => {
             let response;
             if (editandoLote) {
                 // Se estiver editando, faz uma requisição PUT
-                response = await fetch(`http://127.0.0.1:5000/lotes/${editandoLote.id}`, {
+                response = await fetch(`http://127.0.0.1:3000/lotes/${editandoLote.id}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -62,7 +62,7 @@ const FormularioLote = () => {
                 });
             } else {
                 // Se não estiver editando, faz uma requisição POST
-                response = await fetch("http://127.0.0.1:5000/lotes", {
+                response = await fetch("http://127.0.0.1:3000/lotes", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -104,7 +104,7 @@ const FormularioLote = () => {
     // Função para excluir um lote
     const handleExcluirLote = async (id: number) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/lotes/${id}`, {
+            const response = await fetch(`http://127.0.0.1:3000/lotes/${id}`, {
                 method: "DELETE",
             });
 

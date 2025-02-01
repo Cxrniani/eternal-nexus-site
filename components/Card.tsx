@@ -29,7 +29,7 @@ const Card: React.FC<CardProps> = ({
           variant === "large" ? "h-52 md:h-[500px] aspect-[4/4]" : "h-auto"
         } aspect-[4/4]`}
       >
-        <Image className="object-cover" src={image} alt={title} layout="fill" />
+        <Image className="object-cover" src={image} alt={title} layout="fill" objectFit="cover" />
       </div>
       <div className="py-2 flex-grow">
         <h2

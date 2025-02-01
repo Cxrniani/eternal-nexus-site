@@ -64,7 +64,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("access_token", data.data.AuthenticationResult.AccessToken);
-        setUser(data.data);
+        setUser({
+          ...data.data,  // Inclui o user_id na resposta
+          id: data.data.user_id,  // Armazena o user_id
+        });
         setIsAuthenticated(true);
       } else {
         const errorData = await response.json();
