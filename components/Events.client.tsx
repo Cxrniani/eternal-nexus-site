@@ -5,6 +5,7 @@ import React from "react";
 import dynamic from "next/dynamic";
 import Card from "./Card";
 import AnimatedComponent from "./AnimatedComponent.client";
+import Image from "next/image";
 
 // Importar o Slider dinamicamente para evitar problemas de SSR
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
@@ -16,25 +17,7 @@ const Events = () => {
       title: "Título do Evento 1",
       subtitle: "Subtítulo do Evento 1",
       date: "01/01/2023",
-    },
-    {
-      image: "https://placehold.co/800x600.png",
-      title: "Título do Evento 2",
-      subtitle: "Subtítulo do Evento 2",
-      date: "02/01/2023",
-    },
-    {
-      image: "https://placehold.co/800x600.png",
-      title: "Título do Evento 3",
-      subtitle: "Subtítulo do Evento 3",
-      date: "03/01/2023",
-    },
-    {
-      image: "https://placehold.co/800x600.png",
-      title: "Título do Evento 4",
-      subtitle: "Subtítulo do Evento 4",
-      date: "04/01/2023",
-    },
+    }
   ];
 
   const settings = {
@@ -49,33 +32,26 @@ const Events = () => {
   };
 
   return (
-    <div className="w-full h-100 bg-slate-950 px-2 md:px-10 lg:px-10 pt-5 pb-20">
+    <div className="flex flex-col mx-auto w-full bg-zinc-950 px-2 md:px-0 lg:px-10 md:pt-5 mt:pb-10 pb-20">
       <AnimatedComponent>
-        <h1 className="text-white font-logoSuave font-bold text-5xl text-center py-10">
-          Eventos Eternal Nexus
+        <h1 className="text-white font-logoSuave font-bold text-5xl text-center pb-10 pt-3">
+          Eventos Espectro Crew
         </h1>
       </AnimatedComponent>
-      <div className="plus-container ">
         <AnimatedComponent>
-          <Slider {...settings}>
-            {eventItems.map((item, index) => (
-              <div
-                key={index}
-                className="px-2 md:px-10 lg:px-10 flex justify-center "
-              >
-                <Card
-                  image={item.image}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  date={item.date}
-                  variant="large"
-                />
-              </div>
-            ))}
-          </Slider>
+          <div className="flex flex-col relative h-96 md:h-[700px] overflow-hidden cursor-pointer">
+            <Image
+              className="object-cover plus-container "
+              src="/assets/background.png"
+              layout="fill"
+              objectPosition="center"
+              alt="Evento"
+            />
+          </div>
+   
+            <a href="/selection" className="text-2xl mt-2 md:text-3xl md:plus-container py-5 font-serif font-bold hover:font-bold text-center bg-violet-950 mx-auto block">Ingressos Aqui</a>
         </AnimatedComponent>
       </div>
-    </div>
   );
 };
 

@@ -28,7 +28,7 @@ export const Navbar = () => {
             <Link
               href={link.href}
               key={link.key}
-              className="font- text-white text-bold flexCenter cursor-pointer pb-1.5 transition-all text-lg hover:font-extrabold hover:text-extrabold ease-in-out"
+              className="font- text-white text-bold flexCenter cursor-pointer  transition-all text-lg hover:font-extrabold hover:text-extrabold ease-in-out"
             >
               {link.label}
             </Link>

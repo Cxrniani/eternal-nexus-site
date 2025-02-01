@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
+import Image from "next/image";
 
 const DashboardPage = () => {
     const { user, isAuthenticated, logout } = useAuth();
@@ -13,7 +14,6 @@ const DashboardPage = () => {
     const [tickets, setTickets] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // ✅ Força um reload após 200ms se ainda estiver carregando
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (loading) {
@@ -70,16 +70,26 @@ const DashboardPage = () => {
                 <h1 className="text-5xl p-3 md:px-0 font-extrabold">Dashboard</h1>
                 <h1 className="text-3xl p-3 md:px-0 font-bold">Bem-vindo, {name || "Usuário"}!</h1>
                 <div className="mt-6">
-                    <h2 className="text-2xl font-bold">Seus Tickets</h2>
+                    <h2 className="text-2xl text-center py-5 font-bold">Seus Tickets</h2>
                     {tickets.length > 0 ? (
-                        <ul className="space-y-4">
+                        <ul className="flex flex-col px-3 md:px-0 justify-center space-y-4">
                             {tickets.map((ticket) => (
-                                <li key={ticket.code} className="p-4 border border-gray-700 rounded-lg">
-                                    <p className="text-lg font-semibold">Nome: {ticket.name}</p>
-                                    <p className="text-gray-400">CPF: {ticket.cpf}</p>
-                                    <p className="text-gray-400">Código do Ticket: {ticket.code}</p>
-                                    <div className="mt-4">
-                                        <p className="text-gray-400">QR Code:</p>
+                                <li key={ticket.code} className="pt-5 border md:w-1/3 flex flex-col text-center items-center mx-auto border-gray-700 rounded-lg">
+                                    <p className="text-2xl px-20 text-center font-bold pb-1">ETERNAL NEXUS</p>
+                                    <p className="text-xl px-20 text-center text-gray-400 font-semibold pb-1">16/03 até 17/03</p>
+                                    <div className="relative w-full rounded-3xl mb-2 h-[30vh] md:h-60">
+                                        <Image
+                                            src="https://placehold.co/1080x540.png"
+                                            layout="fill"
+                                            objectFit="contain"
+                                            alt="Cover Ingresso Eternal Nexus"
+                                            className="rounded-xl px-2 mx-auto"
+                                        />
+                                    </div>
+                                    <p className="text-gray-200 text-2xl pt-5 font-semibold pb-5">Código do Ingresso:<br/><span className="text-4xl text-red-500">{ticket.code}</span></p>
+                                    <p className="text-md text-gray-400">Nome: {ticket.name}
+                                    <br/>CPF: {ticket.cpf}</p>
+                                    <div className="pb-2">
                                         <div className="p-2 bg-white rounded-lg inline-block">
                                             <QRCodeSVG
                                                 value={ticket.code} // O valor do QR Code é o código do ticket
@@ -89,6 +99,16 @@ const DashboardPage = () => {
                                                 level="Q" // Nível de correção de erro (L, M, Q, H)
                                             />
                                         </div>
+                                    </div>
+                                    <div className="relative w-full bg-preto-opaco py-2 rounded-b-xl">
+                                        <Image
+                                            src="abstract.svg"
+                                            height={1500}
+                                            width={120}
+                                            alt="Cover Ingresso Eternal Nexus"
+                                            className=" mx-auto"
+                                        />
+                                        <p className="text-xl mx-20 font-thin">Powered by: <span className="font-extrabold">Synopsy®</span></p>
                                     </div>
                                 </li>
                             ))}

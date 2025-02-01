@@ -17,8 +17,12 @@ const PaymentPage = () => {
   const [timeLeft, setTimeLeft] = useState<number>(300);
   const [isExpired, setIsExpired] = useState<boolean>(false);
 
-  console.log("usuario: ", user);
-  console.log("id usuario: ", user?.UserAttributes[3].Value);
+  const userID = user.UserAttributes[3].Value;
+  const userNome = user.UserAttributes[2].Value;
+
+  console.log("usuario: ", userID);
+  console.log("id usuario: ", userNome);
+  
 
   // Parâmetros da URL
   const ticketLot = searchParams.get("lot");
@@ -150,8 +154,8 @@ const PaymentPage = () => {
                   transaction_amount: totalAmount,
                   ticketLot,
                   quantity,
-                  user_id: user?.UserAttributes[3].Value,  // Certifique-se de que o user_id está sendo passado
-                  name: user?.UserAttributes[2].Value,
+                  user_id: userID,  // Certifique-se de que o user_id está sendo passado
+                  name: userNome,
                 };
 
                 fetch("http://127.0.0.1:3000/process_payment", {

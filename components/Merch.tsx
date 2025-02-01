@@ -12,26 +12,26 @@ const Merch = () => {
   const merchItems = [
     {
       image: "https://placehold.co/600x400.png",
-      title: "Título do Card 1",
-      subtitle: "Subtítulo do Card 1",
+      title: "Copo Etternal Nexus",
+      subtitle: "R$ 25,00",
       variant: "buy",
     },
     {
       image: "https://placehold.co/600x400.png",
-      title: "Título do Card 2",
-      subtitle: "Subtítulo do Card 2",
+      title: "Tirante Etternal Nexus",
+      subtitle: "R$ 15,00",
       variant: "buy",
     },
     {
       image: "https://placehold.co/600x400.png",
-      title: "Título do Card 3",
-      subtitle: "Subtítulo do Card 3",
+      title: "Dapo Espectro Crew",
+      subtitle: "R$ 30,00",
       variant: "buy",
     },
     {
       image: "https://placehold.co/600x400.png",
-      title: "Título do Card 4",
-      subtitle: "Subtítulo do Card 4",
+      title: "Camiseta Espectro Crew",
+      subtitle: "R$ 90,00",
       variant: "buy",
     },
   ];
@@ -70,25 +70,24 @@ const Merch = () => {
   };
 
   return (
-    <div
-      className="w-full bg-fit py-10 bg-slate-900 bg-blend-lighten"
-      style={{ backgroundImage: "url('assets/background.png')" }}
-    >
-      <div className="plus-container md:rounded-xl lg:rounded-xl bg-slate-900 py-10 px-1 md:p-10">
-        <div className="max-container">
+    <div style={{ backgroundImage: "url('/assets/hero2.jpg')" }} className="bg-zinc-900 bg-opacity-70 bg-center bg-blend-overlay bg-contain">
+      <div
+        className="w-full p-5 md:px-14 bg-zinc-900 bg-opacity-80 bg-contain"
+      >
+        <div className="plus-container">
           <AnimatedComponent>
             <h1 className="mb-5 font-logoSuave font-bold text-4xl lg:text-start text-center">
               Eternal Store
             </h1>
-            <div>
+            <div className="">
               <Slider {...settings}>
                 {merchItems.map((item, index) => (
-                  <div key={index} className="px-1 md:p-0 lg:p-0">
+                  <div key={index} className="px-1 md:px-0">
                     <Card
                       image={item.image}
                       title={item.title}
                       subtitle={item.subtitle}
-                      variant="buy"
+                      variant="default"
                     />
                   </div>
                 ))}

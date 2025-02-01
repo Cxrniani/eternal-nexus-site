@@ -26,24 +26,25 @@ const Card: React.FC<CardProps> = ({
     >
       <div
         className={`relative w-full ${
-          variant === "large" ? "h-52 md:h-[500px] aspect-[4/4]" : "h-auto"
+          variant === "large" ? "w-full h-52 md:h-[500px] aspect-[4/4]" : "h-auto"
         } aspect-[4/4]`}
       >
-        <Image className="object-cover" src={image} alt={title} layout="fill" objectFit="cover" />
+        <Image className="" src={image} alt={title} layout="fill" objectFit="cover" />
       </div>
       <div className="py-2 flex-grow">
-        <h2
+      <h2
           className={`text-start font-bold text-white ${
-            variant === "large" ? "text-3xl" : "text-sm md:text-xl lg:text-xl"
+            variant === "large" ? "text-3xl w-fit mx-auto px-10 " : "text-sm md:text-xl lg:text-xl"
           }`}
-        >
+        ><a href="/selection">
           {title}
+          </a>
         </h2>
         {variant === "large" && date && (
-          <p className="text-gray-400 text-2xl">{date}</p>
+          <p className="text-gray-400 text-start py-2 text-3xl">{date}</p>
         )}
         <p
-          className={`text-gray-600 ${
+          className={`text-gray-400 text-start ${
             variant === "large" ? "text-lg" : "text-xs md:text-xl lg:text-xl"
           }`}
         >

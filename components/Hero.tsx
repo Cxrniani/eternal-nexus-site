@@ -38,19 +38,17 @@ const Hero = () => {
     arrows: false,
   };
   return (
-    <div style={{ backgroundImage: "url('assets/background.png')" }} className='bg-slate-900 bg-opacity-50 bg-blend-color-dodge h-[62vh] md:h-[100vh] md:pt-44 bg-cover bg-top md:mt-[-12vh]'>
-      <div className='max-container h-full  bg-transparent  pt-0 pb-0' >
-        <div className='plus-container px-2 md:p-0 lg:p-0 pt-24 '>
-          <Slider {...settings}>
-            {heroItems.map((item, index) => (
-              <div key={index} className="flex justify-around px-0 mx-0">
-                <Card image={item.image} title=' ' variant='large' />
-              </div>
-            ))}
-          </Slider>
-        </div>
+    <div style={{ backgroundImage: "url('/assets/hero2.jpg')" }} className='bg-zinc-950 md:bg-zinc-900 md:bg-opacity-70 bg-center bg-blend-overlay md:py-24 bg-contain'>
+      <div className='plus-container'>
+        <Slider {...settings}>
+        {heroItems.map((item, index) => (
+          <div key={index} className="flex justify-around px-0 mx-0">
+          <Card image={item.image} title=' ' variant='large' />
+          </div>
+        ))}
+        </Slider>
       </div>
-    </div>
+      </div>
   );
 };
 

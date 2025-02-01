@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuth } from "@/components/AuthContext";
 
 interface Lote {
     id: number;
@@ -15,10 +16,17 @@ interface Lote {
 
 const SelectionPage = () => {
     const router = useRouter();
+    const { isAuthenticated } = useAuth();
     const [lotes, setLotes] = useState<Lote[]>([]);
     const [ticketLot, setTicketLot] = useState<string>("");
     const [quantity, setQuantity] = useState<number>(1);
     const [paymentMethod, setPaymentMethod] = useState<string>("");
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push("/login");
+        }
+    }, [isAuthenticated, router]);
 
     // Busca os lotes da API
     const fetchLotes = async () => {
