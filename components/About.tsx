@@ -114,10 +114,10 @@ const About = () => {
                flex flex-col md:rounded-3xl align-middle items-center w-full max-w-lg h-[660px] md:shadow-lg md:shadow-violet-900 py-10 px-20 flex-1">
                 <div className="relative w-56 h-56 rounded-full overflow-hidden ">
                   <Image
-                    src="https://placehold.co/300x300.png"
+                    src="/assets/teo.jpeg"
                     alt="Idealizador 2"
                     layout="fill"
-                    className="rounded-full object-cover"
+                    className="rounded-full align-middle justify-center items-center object-cover object-center overflow-hidden"
                   /></div>
                 <p className="text-2xl font-bold text-center text-white mt-4">Matteo "Teo" Dalmati</p>
                 <p className="text-white mt-2 text-center">
