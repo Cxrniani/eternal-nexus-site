@@ -1,4 +1,3 @@
-// app/selecao-ingressos/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -21,10 +20,14 @@ const SelectionPage = () => {
     const [ticketLot, setTicketLot] = useState<string>("");
     const [quantity, setQuantity] = useState<number>(1);
     const [paymentMethod, setPaymentMethod] = useState<string>("");
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Estado de carregamento
 
     useEffect(() => {
+        // Verifica a autenticação antes de qualquer coisa
         if (!isAuthenticated) {
             router.push("/login");
+        } else {
+            setIsLoading(false); // Autenticação confirmada, permite renderização
         }
     }, [isAuthenticated, router]);
 
@@ -50,10 +53,12 @@ const SelectionPage = () => {
         }
     };
 
-    // Busca os lotes ao carregar a página
+    // Busca os lotes após confirmar a autenticação
     useEffect(() => {
-        fetchLotes();
-    }, []);
+        if (isAuthenticated) {
+            fetchLotes();
+        }
+    }, [isAuthenticated]);
 
     const loteSelecionado = lotes.find((lote) => lote.id.toString() === ticketLot);
     const totalAmount = loteSelecionado ? loteSelecionado.valor * quantity : 0;
@@ -69,6 +74,11 @@ const SelectionPage = () => {
             `/payment?lot=${ticketLot}&quantity=${quantity}&method=${paymentMethod}&nome=${loteSelecionado?.nome}&valor=${loteSelecionado?.valor}`
         );
     };
+
+    // Se ainda estiver carregando ou não autenticado, não renderiza nada
+    if (isLoading) {
+        return null; // Ou um spinner de carregamento
+    }
 
     return (
         <div className="w-full h-auto bg-slate-950">

@@ -58,20 +58,20 @@ export const Navbar = () => {
 
               {/* Dropdown */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-slate-700 rounded-lg shadow-lg">
+                <div className="absolute right-0 mt-2 w-48 bg-zinc-700 rounded-lg shadow-lg">
                   <Link
                     href="/dashboard"
-                    className="block px-4 py-2 text-slate-300 rounded-xl hover:bg-gray-100"
+                    className="block px-4 py-2 rounded-t-xl text-zinc-300 hover:bg-zinc-500"
                     onClick={() => setIsDropdownOpen(false)}
                   >
-                    Dashboard
+                    Meus Ingressos
                   </Link>
                   <button
                     onClick={() => {
                       logout();
                       setIsDropdownOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-2 rounded-xl text-slate-300 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 rounded-b-xl text-zinc-300 hover:bg-zinc-500"
                   >
                     Sair
                   </button>

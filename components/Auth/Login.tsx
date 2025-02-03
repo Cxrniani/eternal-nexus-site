@@ -26,7 +26,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/check-email", {
+      const response = await fetch("http://127.0.0.1:3000/check-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,8 +41,8 @@ const Login = () => {
         await login(email, password);
 
         // Redireciona para o dashboard após o login ser concluído
-        router.push("/dashboard");
-      } else {
+        window.location.reload();
+            } else {
         setError("E-mail não encontrado. Redirecionando para o registro...");
         router.push("/register");
       }

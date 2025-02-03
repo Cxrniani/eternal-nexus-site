@@ -14,11 +14,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    restoreSession();
-}, []);
-
   // Função para restaurar a sessão ao carregar a página
   const restoreSession = async () => {
     const accessToken = localStorage.getItem("access_token");
@@ -29,7 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/user", {
+      const response = await fetch("http://127.0.0.1:3000/user", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -57,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-        const response = await fetch("http://127.0.0.1:5000/login", {
+        const response = await fetch("http://127.0.0.1:3000/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -93,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const accessToken = localStorage.getItem("access_token");
       if (accessToken) {
-        await fetch("http://127.0.0.1:5000/logout", {
+        await fetch("http://127.0.0.1:3000/logout", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
