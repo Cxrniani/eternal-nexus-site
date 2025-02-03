@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
 const Login = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +20,14 @@ const Login = () => {
       router.push("/dashboard");
     }
   }, [isAuthenticated, router]);
+
+  // Preenche o e-mail automaticamente se vier como parâmetro na URL
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,14 +46,11 @@ const Login = () => {
       const data = await response.json();
 
       if (data.exists) {
-        // Aguarda a conclusão do login e a atualização do estado `user`
         await login(email, password);
-
-        // Redireciona para o dashboard após o login ser concluído
         window.location.reload();
-            } else {
+      } else {
         setError("E-mail não encontrado. Redirecionando para o registro...");
-        router.push("/register");
+        router.push(`/register?email=${encodeURIComponent(email)}`);
       }
     } catch (err) {
       setError("Erro ao fazer login. Verifique suas credenciais.");

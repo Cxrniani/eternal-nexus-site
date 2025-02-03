@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
 const Register = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +31,14 @@ const Register = () => {
     }
   }, [isAuthenticated, router]);
 
-  // Função para validar a senha
+  // Preenche o e-mail automaticamente se vier como parâmetro na URL
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
+
   const validatePassword = (password: string) => {
     setHasUpperCase(/[A-Z]/.test(password));
     setHasLowerCase(/[a-z]/.test(password));
@@ -39,7 +47,6 @@ const Register = () => {
     setHasMinLength(password.length >= 8);
   };
 
-  // Função para validar o formulário
   const validateForm = () => {
     if (!email || !password || !name) {
       setError("Todos os campos são obrigatórios.");
@@ -61,7 +68,6 @@ const Register = () => {
     return true;
   };
 
-  // Função para lidar com o registro
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -71,7 +77,6 @@ const Register = () => {
     setSuccess(false);
 
     try {
-      // Passo 1: Verificar e-mail
       const checkResponse = await fetch("http://localhost:3000/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,7 +90,6 @@ const Register = () => {
         return;
       }
 
-      // Passo 2: Registrar via API Flask
       const registerResponse = await fetch("http://localhost:3000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -149,34 +153,6 @@ const Register = () => {
             required
             className="w-full p-2 mb-2 bg-gray-700 rounded"
           />
-
-          {/* Pop-up de requisitos de senha */}
-          <div className="mt-2 text-sm">
-            <ul>
-              <li className={hasUpperCase ? "text-green-500" : "text-gray-500"}>
-                Deve conter uma letra maiúscula
-              </li>
-              <li className={hasLowerCase ? "text-green-500" : "text-gray-500"}>
-                Deve conter uma letra minúscula
-              </li>
-              <li className={hasNumber ? "text-green-500" : "text-gray-500"}>
-                Deve conter um número
-              </li>
-              <li
-                className={hasSpecialChar ? "text-green-500" : "text-gray-500"}
-              >
-                Deve conter um caractere especial
-              </li>
-              <li className={hasMinLength ? "text-green-500" : "text-gray-500"}>
-                Deve ter pelo menos 8 caracteres
-              </li>
-            </ul>
-          </div>
-
-          {passwordError && (
-            <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-          )}
-
           <button
             type="submit"
             disabled={loading}
@@ -185,12 +161,6 @@ const Register = () => {
             {loading ? "Cadastrando..." : "Cadastrar"}
           </button>
         </form>
-        <p className="mt-4 text-center">
-          Já possui uma conta?{" "}
-          <Link href="/login" className="text-blue-500 hover:underline">
-            Faça login
-          </Link>
-        </p>
       </div>
     </div>
   );
