@@ -10,19 +10,21 @@ const mpPublicKey = process.env.NEXT_PUBLIC_MP_PUBLIC_KEY;
 const PaymentPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth(); // Adicionar accessToken aqui
   const [mp, setMp] = useState<any>(null);
   const [pixCode, setPixCode] = useState<string | null>(null);
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(300);
   const [isExpired, setIsExpired] = useState<boolean>(false);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const userID = user.UserAttributes[3].Value;
-  const userNome = user.UserAttributes[2].Value;
+  const userID = user?.UserAttributes[3]?.Value;
+  const userNome = user?.UserAttributes[2]?.Value;
 
   console.log("usuario: ", userID);
   console.log("id usuario: ", userNome);
-  
 
   // Parâmetros da URL
   const ticketLot = searchParams.get("lot");
@@ -36,7 +38,8 @@ const PaymentPage = () => {
   // Função para copiar o código PIX
   const copyPixCode = () => {
     if (pixCode) {
-      navigator.clipboard.writeText(pixCode)
+      navigator.clipboard
+        .writeText(pixCode)
         .then(() => alert("Código PIX copiado para a área de transferência!"))
         .catch(() => alert("Erro ao copiar o código PIX. Tente novamente."));
     }
@@ -64,14 +67,69 @@ const PaymentPage = () => {
   // Verifica se os parâmetros necessários estão presentes
   useEffect(() => {
     if (!ticketLot || !quantity || !paymentMethod || !nomeLote || !valorLote) {
-      alert("Por favor, selecione o lote, a quantidade e a forma de pagamento.");
+      alert(
+        "Por favor, selecione o lote, a quantidade e a forma de pagamento."
+      );
       router.push("/selection");
     }
   }, [ticketLot, quantity, paymentMethod, nomeLote, valorLote, router]);
 
+  // Função para buscar dados do usuário
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        if (!accessToken) {
+          throw new Error("Token não encontrado");
+        }
+
+        console.log("Token encontrado:", accessToken);
+
+        const response = await fetch("http://127.0.0.1:3000/user", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro ao obter informações do usuário");
+        }
+
+        const data = await response.json();
+        console.log("Dados do usuário recebidos:", data);
+
+        const userAttributes = data.data.UserAttributes;
+        const emailAttr = userAttributes.find(
+          (attr: any) => attr.Name === "email"
+        );
+        const nameAttr = userAttributes.find(
+          (attr: any) => attr.Name === "name"
+        );
+
+        if (emailAttr) {
+          setEmail(emailAttr.Value);
+          console.log("Email definido:", emailAttr.Value);
+        }
+        if (nameAttr) {
+          setName(nameAttr.Value);
+          console.log("Nome definido:", nameAttr.Value);
+        }
+      } catch (error) {
+        console.error(error);
+        // Redirecionar para a página de login se houver um erro
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [router, accessToken]);
+
   // Lógica para inicializar o SDK do Mercado Pago (pagamento com cartão)
   useEffect(() => {
-    if (paymentMethod === "card") {
+    if (paymentMethod === "card" && !loading) {
       const initializeMercadoPagoSDK = async () => {
         try {
           await loadMercadoPago();
@@ -86,10 +144,12 @@ const PaymentPage = () => {
               cardholderName: {
                 id: "form-checkout__cardholderName",
                 placeholder: "Titular do cartão",
+                value: name, // Preencher com o nome do usuário
               },
               cardholderEmail: {
                 id: "form-checkout__cardholderEmail",
                 placeholder: "E-mail",
+                value: email, // Preencher com o e-mail do usuário
               },
               cardNumber: {
                 id: "form-checkout__cardNumber",
@@ -122,7 +182,8 @@ const PaymentPage = () => {
             },
             callbacks: {
               onFormMounted: (error: Error | undefined) => {
-                if (error) return console.error("Erro ao montar formulário:", error);
+                if (error)
+                  return console.error("Erro ao montar formulário:", error);
                 console.log("Formulário montado com sucesso!");
               },
               onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
@@ -138,7 +199,15 @@ const PaymentPage = () => {
                   cardholderEmail,
                 } = cardForm.getCardFormData();
 
-                if (!token || !paymentMethodId || !issuerId || !installments || !identificationNumber || !identificationType || !cardholderEmail) {
+                if (
+                  !token ||
+                  !paymentMethodId ||
+                  !issuerId ||
+                  !installments ||
+                  !identificationNumber ||
+                  !identificationType ||
+                  !cardholderEmail
+                ) {
                   alert("Por favor, preencha todos os campos corretamente.");
                   return;
                 }
@@ -154,31 +223,40 @@ const PaymentPage = () => {
                   transaction_amount: totalAmount,
                   ticketLot,
                   quantity,
-                  user_id: userID,  // Certifique-se de que o user_id está sendo passado
+                  user_id: userID, // Certifique-se de que o user_id está sendo passado
                   name: userNome,
                 };
 
                 fetch("http://127.0.0.1:3000/process_payment", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      "Authorization": `Bearer ${localStorage.getItem("access_token")}`,  // Se necessário
-                    },
-                    body: JSON.stringify(paymentData),
-                  })
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`, // Usar o token do AuthContext
+                  },
+                  body: JSON.stringify(paymentData),
+                })
                   .then((response) => response.json())
                   .then((result) => {
                     if (result.success) {
                       if (result.status === "approved") {
-                        alert("Pagamento aprovado! Redirecionando para a página de confirmação...");
+                        alert(
+                          "Pagamento aprovado! Redirecionando para a página de confirmação..."
+                        );
                         window.location.href = "pagamento-aprovado";
-                      } else if (result.status === "in_process" || result.status === "pending") {
-                        alert("Seu pagamento está em processamento. Você receberá uma confirmação por e-mail.");
+                      } else if (
+                        result.status === "in_process" ||
+                        result.status === "pending"
+                      ) {
+                        alert(
+                          "Seu pagamento está em processamento. Você receberá uma confirmação por e-mail."
+                        );
                         window.location.href = "/pagamento-pendente";
                       }
                     } else {
                       if (result.status === "rejected") {
-                        alert("Pagamento rejeitado. Por favor, tente novamente com outro método de pagamento.");
+                        alert(
+                          "Pagamento rejeitado. Por favor, tente novamente com outro método de pagamento."
+                        );
                       } else {
                         alert(`Erro no pagamento: ${result.error}`);
                       }
@@ -186,7 +264,9 @@ const PaymentPage = () => {
                   })
                   .catch((error) => {
                     console.error("Erro na requisição:", error);
-                    alert("Ocorreu um erro ao processar o pagamento. Tente novamente.");
+                    alert(
+                      "Ocorreu um erro ao processar o pagamento. Tente novamente."
+                    );
                   });
               },
               onFetching: (resource: string) => {
@@ -206,8 +286,24 @@ const PaymentPage = () => {
 
       initializeMercadoPagoSDK();
     }
-  }, [paymentMethod, totalAmount, ticketLot, quantity, user]);
+  }, [
+    paymentMethod,
+    totalAmount,
+    ticketLot,
+    quantity,
+    user,
+    loading,
+    name,
+    email,
+    accessToken,
+  ]);
 
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  console.log("Renderizando PaymentPage com email:", email);
+  console.log("Renderizando PaymentPage com nome:", name);
 
   return (
     <div className="w-full h-auto bg-slate-950">
@@ -215,7 +311,8 @@ const PaymentPage = () => {
         <div className="flex w-full">
           <div className="flex flex-col justify-center w-full">
             <h1 className="py-5 text-2xl font-extrabold text-center text-white">
-              Checkout - {quantity}x Ingresso {nomeLote} <br />Total: R$ {totalAmount.toFixed(2)}
+              Checkout - {quantity}x Ingresso {nomeLote} <br />
+              Total: R$ {totalAmount.toFixed(2)}
             </h1>
 
             {/* Formulário de cartão */}
@@ -245,6 +342,8 @@ const PaymentPage = () => {
                     id="form-checkout__cardholderName"
                     className="w-full p-2 border text-black border-gray-500 rounded-sm"
                     placeholder="Nome do Titular"
+                    value={name} // Preencher com o nome do usuário
+                    onChange={(e) => setName(e.target.value)}
                   />
                   <select
                     id="form-checkout__issuer"
@@ -269,6 +368,8 @@ const PaymentPage = () => {
                     id="form-checkout__cardholderEmail"
                     className="w-full p-2 border text-black border-gray-500 rounded-sm"
                     placeholder="Email"
+                    value={email} // Preencher com o e-mail do usuário
+                    onChange={(e) => setEmail(e.target.value)}
                   />
 
                   <div className="py-5">
@@ -300,31 +401,49 @@ const PaymentPage = () => {
                     event.preventDefault();
 
                     const pixData = {
-                      cardholderEmail: (document.getElementById("pix-email") as HTMLInputElement).value,
-                      identificationNumber: (document.getElementById("pix-cpf") as HTMLInputElement).value,
+                      cardholderEmail: (
+                        document.getElementById("pix-email") as HTMLInputElement
+                      ).value,
+                      identificationNumber: (
+                        document.getElementById("pix-cpf") as HTMLInputElement
+                      ).value,
                       identificationType: "CPF",
                       transaction_amount: totalAmount,
-                      firstName: (document.getElementById("pix-name") as HTMLInputElement).value.split(" ")[0],
-                      lastName: (document.getElementById("pix-name") as HTMLInputElement).value.split(" ").slice(1).join(" "),
+                      firstName: (
+                        document.getElementById("pix-name") as HTMLInputElement
+                      ).value.split(" ")[0],
+                      lastName: (
+                        document.getElementById("pix-name") as HTMLInputElement
+                      ).value
+                        .split(" ")
+                        .slice(1)
+                        .join(" "),
                       user_id: user?.UserAttributes[3].Value, // Usando o ID do usuário logado
                     };
 
                     try {
-                      const response = await fetch("http://127.0.0.1:5000/process_payment_pix", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(pixData),
-                      });
+                      const response = await fetch(
+                        "http://127.0.0.1:5000/process_payment_pix",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify(pixData),
+                        }
+                      );
 
                       const result = await response.json();
 
                       if (result.success) {
                         if (result.status === "pending") {
-                          alert("Pagamento PIX gerado com sucesso! Escaneie o QR Code ou copie o código PIX para concluir o pagamento.");
+                          alert(
+                            "Pagamento PIX gerado com sucesso! Escaneie o QR Code ou copie o código PIX para concluir o pagamento."
+                          );
 
-                          setQrCodeImage(`data:image/png;base64,${result.pix_qr_code_base64}`);
+                          setQrCodeImage(
+                            `data:image/png;base64,${result.pix_qr_code_base64}`
+                          );
                           setPixCode(result.pix_copia_cola);
                           setTimeLeft(300);
                           setIsExpired(false);
@@ -334,7 +453,9 @@ const PaymentPage = () => {
                       }
                     } catch (error) {
                       console.error("Erro na requisição:", error);
-                      alert("Ocorreu um erro ao processar o pagamento PIX. Tente novamente.");
+                      alert(
+                        "Ocorreu um erro ao processar o pagamento PIX. Tente novamente."
+                      );
                     }
                   }}
                 >
@@ -343,12 +464,16 @@ const PaymentPage = () => {
                     id="pix-name"
                     className="w-full p-2 border text-black border-gray-500 rounded-sm"
                     placeholder="Nome Completo"
+                    value={name} // Preencher com o nome do usuário
+                    onChange={(e) => setName(e.target.value)}
                   />
                   <input
                     type="email"
                     id="pix-email"
                     className="w-full p-2 border text-black border-gray-500 rounded-sm"
                     placeholder="E-mail"
+                    value={email} // Preencher com o e-mail do usuário
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                   <input
                     type="text"
@@ -368,8 +493,13 @@ const PaymentPage = () => {
 
                   {/* Container para o QR Code */}
                   {qrCodeImage && !isExpired && (
-                    <div id="pix-qr-code-container" className="flex justify-center flex-col items-center">
-                      <p className="text-white mb-2">Tempo restante: {formatTime(timeLeft)}</p>
+                    <div
+                      id="pix-qr-code-container"
+                      className="flex justify-center flex-col items-center"
+                    >
+                      <p className="text-white mb-2">
+                        Tempo restante: {formatTime(timeLeft)}
+                      </p>
                       <img
                         src={qrCodeImage}
                         alt="QR Code PIX"
@@ -406,7 +536,10 @@ const PaymentPage = () => {
                   {/* Mensagem de tempo expirado */}
                   {isExpired && (
                     <div className="mt-4 text-center text-red-500">
-                      <p>O tempo para realizar o pagamento PIX expirou. Por favor, gere um novo QR Code.</p>
+                      <p>
+                        O tempo para realizar o pagamento PIX expirou. Por
+                        favor, gere um novo QR Code.
+                      </p>
                     </div>
                   )}
                 </form>
