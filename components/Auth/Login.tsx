@@ -14,6 +14,11 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleForgotPassword = () => {
+    // Redirecione para a página de esqueci minha senha com o e-mail como parâmetro de consulta
+    router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
+  };
+
   // Redireciona para o dashboard se o usuário já estiver autenticado
   useEffect(() => {
     if (isAuthenticated) {
@@ -58,7 +63,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       <div className="w-96 bg-gray-800 shadow-md rounded-lg p-6">
@@ -90,12 +94,13 @@ const Login = () => {
           </button>
         </form>
         <div className="mt-4 text-center">
-          <Link
-            href="/forgot-password"
+          <a
+            href="#"
+            onClick={handleForgotPassword}
             className="text-blue-500 hover:underline"
           >
             Esqueci minha senha
-          </Link>
+          </a>
         </div>
         <p className="mt-4 text-center">
           Não possui uma conta?{" "}

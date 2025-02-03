@@ -77,20 +77,7 @@ const Register = () => {
     setSuccess(false);
 
     try {
-      const checkResponse = await fetch("http://localhost:3000/check-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const checkData = await checkResponse.json();
-
-      if (checkData.exists) {
-        setError("Este e-mail já está registrado.");
-        return;
-      }
-
-      const registerResponse = await fetch("http://localhost:3000/register", {
+      const registerResponse = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name }),
