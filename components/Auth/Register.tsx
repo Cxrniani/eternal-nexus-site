@@ -72,7 +72,7 @@ const Register = () => {
 
     try {
       // Passo 1: Verificar e-mail
-      const checkResponse = await fetch("http://localhost:5000/check-email", {
+      const checkResponse = await fetch("http://localhost:3000/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -86,7 +86,7 @@ const Register = () => {
       }
 
       // Passo 2: Registrar via API Flask
-      const registerResponse = await fetch("http://localhost:5000/register", {
+      const registerResponse = await fetch("http://localhost:3000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name }),
