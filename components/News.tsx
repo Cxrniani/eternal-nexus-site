@@ -1,7 +1,6 @@
-// /components/News.tsx
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import AnimatedComponent from "@/components/AnimatedComponent.client";
 import Slider from "react-slick";
@@ -9,28 +8,25 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const News = () => {
-  const newsItems = [
-    {
-      image: "https://placehold.co/600x600.png",
-      title: "Título do Card 1",
-      subtitle: "Subtítulo do Card 1",
-    },
-    {
-      image: "https://placehold.co/600x600.png",
-      title: "Título do Card 2",
-      subtitle: "Subtítulo do Card 2",
-    },
-    {
-      image: "https://placehold.co/600x600.png",
-      title: "Título do Card 3",
-      subtitle: "Subtítulo do Card 3",
-    },
-    {
-      image: "https://placehold.co/600x600.png",
-      title: "Título do Card 4",
-      subtitle: "Subtítulo do Card 4",
-    },
-  ];
+  const [newsItems, setNewsItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:3000/news");
+        if (!response.ok) {
+          throw new Error("Erro ao buscar notícias");
+        }
+        const data = await response.json();
+        console.log("Notícias recebidas:", data);
+        setNewsItems(data);
+      } catch (error) {
+        console.error("Erro ao buscar notícias:", error);
+      }
+    };
+
+    fetchNews();
+  }, []);
 
   const settings = {
     dots: false,
@@ -66,27 +62,30 @@ const News = () => {
   };
 
   return (
-    <div className="w-full bg-opacity-100 bg-slate-900 py-10 px-1 md:p-10 lg:p-10">
-      <div className="max-container">
-        <AnimatedComponent>
-          <h1 className="font-bold text-4xl lg:text-start font-logoSuave text-center pb-10">
-            Eternal News
-          </h1>
-          <div>
-            <Slider {...settings}>
-              {newsItems.map((item, index) => (
-                <div key={index} className="px-1 md:p-0 lg:p-0">
-                  <Card
-                    image={item.image}
-                    title={item.title}
-                    subtitle={item.subtitle}
-                  />
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </AnimatedComponent>
-      </div>
+    <div
+      style={{ backgroundImage: "url('/assets/hero2.jpg')" }}
+      className="flex flex-col w-full bg-opacity-90 bg-blend-overlay md:shadow-sm md:shadow-violet-900 bg-zinc-950 pb-5 md:py-5 px-1 md:px-14 md:p-10"
+    >
+      <AnimatedComponent>
+        <h1 className="max-container font-bold text-3xl md:text-4xl md:text-start font-logoSuave text-center pb-3 md:pb-10">
+          Eternal News
+        </h1>
+        <div className="max-container">
+          <Slider {...settings}>
+            {newsItems.map((item, index) => (
+              <div key={index} className="px-1 md:px-0">
+                <Card
+                  image={item.image}
+                  title={item.title}
+                  subtitle={item.subtitle}
+                  date={item.date}
+                  variant="default" // Certifique-se de usar a variante correta
+                />
+              </div>
+            ))}
+          </Slider>
+        </div>
+      </AnimatedComponent>
     </div>
   );
 };

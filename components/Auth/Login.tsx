@@ -1,32 +1,38 @@
-// /components/Auth/Login.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  CognitoUserPool,
-  CognitoUser,
-  AuthenticationDetails,
-} from "amazon-cognito-identity-js";
-import { poolData } from "@/cognitoConfig";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
-const userPool = new CognitoUserPool(poolData);
-
 const Login = () => {
   const router = useRouter();
-  const { login, isAuthenticated } = useAuth(); // Verifica se o usuário já está autenticado
+  const searchParams = useSearchParams();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleForgotPassword = () => {
+    // Redirecione para a página de esqueci minha senha com o e-mail como parâmetro de consulta
+    router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
+  };
+
+  // Redireciona para o dashboard se o usuário já estiver autenticado
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard"); // Redireciona para o dashboard se já estiver autenticado
+      router.push("/dashboard");
     }
   }, [isAuthenticated, router]);
+
+  // Preenche o e-mail automaticamente se vier como parâmetro na URL
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,34 +40,29 @@ const Login = () => {
     setError(null);
 
     try {
-      await login(email, password); // Agora a função login será encontrada corretamente
-      router.push("/dashboard");
+      const response = await fetch("http://127.0.0.1:3000/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.exists) {
+        await login(email, password);
+        window.location.reload();
+      } else {
+        setError("E-mail não encontrado. Redirecionando para o registro...");
+        router.push(`/register?email=${encodeURIComponent(email)}`);
+      }
     } catch (err) {
       setError("Erro ao fazer login. Verifique suas credenciais.");
+    } finally {
       setLoading(false);
     }
-
-    const authenticationDetails = new AuthenticationDetails({
-      Username: email,
-      Password: password,
-    });
-
-    const cognitoUser = new CognitoUser({
-      Username: email,
-      Pool: userPool,
-    });
-
-    cognitoUser.authenticateUser(authenticationDetails, {
-      onSuccess: (result) => {
-        router.push("/dashboard");
-      },
-      onFailure: (err) => {
-        setError("Erro ao fazer login. Verifique suas credenciais.");
-        setLoading(false);
-      },
-    });
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       <div className="w-96 bg-gray-800 shadow-md rounded-lg p-6">
@@ -93,12 +94,13 @@ const Login = () => {
           </button>
         </form>
         <div className="mt-4 text-center">
-          <Link
-            href="/forgot-password"
+          <a
+            href="#"
+            onClick={handleForgotPassword}
             className="text-blue-500 hover:underline"
           >
             Esqueci minha senha
-          </Link>
+          </a>
         </div>
         <p className="mt-4 text-center">
           Não possui uma conta?{" "}

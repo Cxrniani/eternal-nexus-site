@@ -1,7 +1,11 @@
-// /app/payment/page.tsx (pagina de pagamento)
-import Checkout from "@/components/Checkout";
-import EmbeddedCheckoutButton from "@/components/EmbeddedCheckoutButton";
+import PaymentPage from "@/components/PaymentPage";
+import SelectionPage from "@/components/SelectionPage";
+
 
 export default function Payment() {
-  return <EmbeddedCheckoutButton />;
+    return (
+        <>
+            <PaymentPage />
+        </>
+    )
 }

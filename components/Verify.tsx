@@ -3,10 +3,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CognitoUser, CognitoUserPool } from "amazon-cognito-identity-js";
-import { poolData } from "@/cognitoConfig";
-
-const userPool = new CognitoUserPool(poolData);
 
 const Verify = () => {
   const [email, setEmail] = useState("");
@@ -24,42 +20,57 @@ const Verify = () => {
     }
   }, []);
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(false);
 
-    const user = new CognitoUser({
-      Username: email,
-      Pool: userPool,
-    });
+    try {
+      const response = await fetch("http://127.0.0.1:5000/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, code }),
+      });
 
-    user.confirmRegistration(code, true, (err, result) => {
-      setLoading(false);
-      if (err) {
-        setError(err.message || "Erro ao verificar o código.");
-        return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao verificar o código");
       }
+
       setSuccess(true);
       router.push("/login");
-    });
+    } catch (err) {
+      setError("Erro ao verificar o código");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleResendCode = () => {
-    const user = new CognitoUser({
-      Username: email,
-      Pool: userPool,
-    });
+  const handleResendCode = async () => {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/resend-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    user.resendConfirmationCode((err, result) => {
-      if (err) {
-        setError("Erro ao reenviar o código. Tente novamente.");
-        return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao reenviar código");
       }
+
       setSuccess(true);
       setError(null);
-    });
+    } catch (err) {
+      setError("Erro ao reenviar código");
+    }
   };
 
   return (
@@ -68,7 +79,11 @@ const Verify = () => {
         <h1 className="text-2xl font-bold mb-4">Verificar Email: {email}</h1>
         {error && <p className="text-red-500">{error}</p>}
         {success && (
-          <p className="text-green-500">Código reenviado com sucesso!</p>
+          <p className="text-green-500">
+            {code
+              ? "Verificação realizada com sucesso!"
+              : "Código reenviado com sucesso!"}
+          </p>
         )}
         <form onSubmit={handleVerify}>
           <input

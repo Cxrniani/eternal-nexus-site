@@ -1,19 +1,14 @@
-// /components/Auth/Register.tsx
 "use client";
 
-import React, { useState } from "react";
-import {
-  CognitoUserPool,
-  CognitoUserAttribute,
-} from "amazon-cognito-identity-js";
-import { poolData } from "@/cognitoConfig";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-
-const userPool = new CognitoUserPool(poolData);
+import { useAuth } from "@/components/AuthContext";
 
 const Register = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -22,10 +17,34 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  // Estados para as validações da senha
+  const [hasUpperCase, setHasUpperCase] = useState(false);
+  const [hasLowerCase, setHasLowerCase] = useState(false);
+  const [hasNumber, setHasNumber] = useState(false);
+  const [hasSpecialChar, setHasSpecialChar] = useState(false);
+  const [hasMinLength, setHasMinLength] = useState(false);
+
+  // Redireciona para o dashboard se o usuário já estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
+  // Preenche o e-mail automaticamente se vier como parâmetro na URL
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+    }
+  }, [searchParams]);
+
   const validatePassword = (password: string) => {
-    const regex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/;
-    return regex.test(password);
+    setHasUpperCase(/[A-Z]/.test(password));
+    setHasLowerCase(/[a-z]/.test(password));
+    setHasNumber(/\d/.test(password));
+    setHasSpecialChar(/[!@#$%^&*(),.?":{}|<>]/.test(password));
+    setHasMinLength(password.length >= 8);
   };
 
   const validateForm = () => {
@@ -33,9 +52,15 @@ const Register = () => {
       setError("Todos os campos são obrigatórios.");
       return false;
     }
-    if (!validatePassword(password)) {
+    if (
+      !hasUpperCase ||
+      !hasLowerCase ||
+      !hasNumber ||
+      !hasSpecialChar ||
+      !hasMinLength
+    ) {
       setPasswordError(
-        "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
+        "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial."
       );
       return false;
     }
@@ -43,7 +68,7 @@ const Register = () => {
     return true;
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -51,19 +76,30 @@ const Register = () => {
     setError(null);
     setSuccess(false);
 
-    const attributeList = [
-      new CognitoUserAttribute({ Name: "name", Value: name }),
-    ];
+    try {
+      const registerResponse = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name }),
+      });
 
-    userPool.signUp(email, password, attributeList, [], (err, result) => {
-      setLoading(false);
-      if (err) {
-        setError(err.message || "Erro ao cadastrar. Verifique os dados.");
-        return;
+      const registerData = await registerResponse.json();
+
+      if (!registerResponse.ok) {
+        throw new Error(registerData.error || "Erro ao registrar");
       }
+
       setSuccess(true);
       router.push(`/verify?email=${encodeURIComponent(email)}`);
-    });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao registrar. Tente novamente."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,20 +135,11 @@ const Register = () => {
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
-              if (!validatePassword(e.target.value)) {
-                setPasswordError(
-                  "A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial."
-                );
-              } else {
-                setPasswordError(null);
-              }
+              validatePassword(e.target.value);
             }}
             required
             className="w-full p-2 mb-2 bg-gray-700 rounded"
           />
-          {passwordError && (
-            <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-          )}
           <button
             type="submit"
             disabled={loading}
@@ -121,12 +148,6 @@ const Register = () => {
             {loading ? "Cadastrando..." : "Cadastrar"}
           </button>
         </form>
-        <p className="mt-4 text-center">
-          Já possui uma conta?{" "}
-          <Link href="/login" className="text-blue-500 hover:underline">
-            Faça login
-          </Link>
-        </p>
       </div>
     </div>
   );

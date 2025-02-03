@@ -4,8 +4,8 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-preto-opaco text-white p-10">
-      <div className="max-container flex flex-col md:flex-row items-start md:items-center justify-around">
+    <footer className=" bg-preto-opaco text-white p-10">
+      <div className="max-container flex flex-col md:flex-row items-center text-center md:text-start justify-around">
         {/* Seção 1 */}
         <div className="flex-1">
           <h3 className="text-5xl font-bold ">
@@ -27,14 +27,21 @@ const Footer = () => {
             <li className="mb-2">Email: contato@eternalnexus.com</li>
             <li className="mb-2">Telefone: (67) 99999-9999</li>
             <li>Redes sociais:</li>
-            <div className="flex flex-row gap-2 pt-2">
+            <div className="flex flex-row gap-2 pt-2 justify-center md:justify-start">
               <Image
-                src="instagram.svg"
-                alt="Instagram"
-                width={40}
-                height={40}
+              className="cursor-pointer"
+              src="instagram.svg"
+              alt="Instagram"
+              width={40}
+              height={40}
               />
-              <Image src="whatsapp.svg" alt="WhatsApp" width={40} height={40} />
+              <Image
+              className="cursor-pointer"
+              src="whatsapp.svg"
+              alt="WhatsApp"
+              width={40}
+              height={40}
+              />
             </div>
           </ul>
         </div>
