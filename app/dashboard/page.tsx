@@ -101,7 +101,7 @@ const DashboardPage = () => {
               {tickets.map((ticket) => (
                 <li
                   key={ticket.code}
-                  className="pt-5 border md:w-1/3 flex flex-col text-center items-center mx-auto border-gray-700 rounded-lg"
+                  className="pt-5 border-2 bg-zinc-800 md:w-1/3 flex flex-col text-center items-center mx-auto border-gray-700 rounded-lg"
                 >
                   <p className="text-3xl px-20 text-center font-bold font-logoSuave pb-1">
                     ETERNAL NEXUS
@@ -111,13 +111,16 @@ const DashboardPage = () => {
                   </p>
                   <div className="relative w-full rounded-3xl mb-2 h-[30vh] md:h-60">
                     <Image
-                      src="https://placehold.co/1080x540.png"
+                      src="/assets/background.png"
                       layout="fill"
-                      objectFit="contain"
+                      objectFit="cover"
                       alt="Cover Ingresso Eternal Nexus"
-                      className="rounded-xl px-2 mx-auto"
+                      className=" mx-auto"
                     />
                   </div>
+                  <p className="text-gray-200 text-xl pt-5 font-semibold pb-5">Valor: {Number(ticket.price).toFixed(2)}
+                    <br/>Lote: {ticket.lot}
+                  </p>
                   <p className="text-gray-200 text-2xl pt-5 font-semibold pb-5">
                     Código do Ingresso:
                     <br />

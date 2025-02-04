@@ -19,21 +19,22 @@ const PaymentPage = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const userID = user?.UserAttributes[3]?.Value;
-  const userNome = user?.UserAttributes[2]?.Value;
-
-  console.log("usuario: ", userID);
-  console.log("id usuario: ", userNome);
-
-  // Parâmetros da URL
   const ticketLot = searchParams.get("lot");
   const quantity = Number(searchParams.get("quantity"));
   const paymentMethod = searchParams.get("method");
   const nomeLote = searchParams.get("nome");
   const valorLote = Number(searchParams.get("valor"));
 
-  const totalAmount = valorLote * quantity; // Valor total calculado
+  const userID = user?.UserAttributes[3]?.Value;
+  const userNome = user?.UserAttributes[2]?.Value;
+
+  console.log("lote: ", nomeLote);
+  console.log("valor: ", valorLote - (valorLote * 0.080));
+  console.log("usuario: ", userID);
+  console.log("id usuario: ", userNome);
+
+  const totalAmount = (valorLote + (valorLote*0.08)) * quantity; // Valor total calculado
+  console.log("total: ", totalAmount);
 
   // Função para copiar o código PIX
   const copyPixCode = () => {
@@ -225,7 +226,12 @@ const PaymentPage = () => {
                   quantity,
                   user_id: userID, // Certifique-se de que o user_id está sendo passado
                   name: userNome,
+                  lot: nomeLote,
+                  price: parseFloat((valorLote - (valorLote * 0.08)).toFixed(2)),
+                  event_id: "etternal-nexus",
                 };
+
+
 
                 fetch("http://127.0.0.1:3000/process_payment", {
                   method: "POST",
