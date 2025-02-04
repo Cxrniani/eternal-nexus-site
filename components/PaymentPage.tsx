@@ -24,6 +24,7 @@ const PaymentPage = () => {
   const paymentMethod = searchParams.get("method");
   const nomeLote = searchParams.get("nome");
   const valorLote = Number(searchParams.get("valor"));
+  
 
   const userID = user?.UserAttributes[3]?.Value;
   const userNome = user?.UserAttributes[2]?.Value;
@@ -227,8 +228,9 @@ const PaymentPage = () => {
                   user_id: userID, // Certifique-se de que o user_id está sendo passado
                   name: userNome,
                   lot: nomeLote,
-                  price: parseFloat((valorLote - (valorLote * 0.08)).toFixed(2)),
+                  price: parseFloat(valorLote.toFixed(2)),
                   event_id: "etternal-nexus",
+                  application_fee: parseFloat(((totalAmount - (totalAmount*0.0498))*0.0255).toFixed(2)),
                 };
 
 

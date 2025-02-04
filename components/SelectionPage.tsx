@@ -62,7 +62,6 @@ const SelectionPage = () => {
 
     const loteSelecionado = lotes.find((lote) => lote.id.toString() === ticketLot);
     const tax = loteSelecionado ? loteSelecionado.valor * 0.08 : 0;
-    const liquidTax = loteSelecionado ? loteSelecionado.valor * 0.039 : 0;
     const totalAmount = loteSelecionado ? (Number(loteSelecionado.valor) + Number(tax) ) * quantity : 0;
 
     const handleProceedToPayment = () => {
