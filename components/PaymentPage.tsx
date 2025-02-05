@@ -24,7 +24,7 @@ const PaymentPage = () => {
   const paymentMethod = searchParams.get("method");
   const nomeLote = searchParams.get("nome");
   const valorLote = Number(searchParams.get("valor"));
-  
+
 
   const userID = user?.UserAttributes[3]?.Value;
   const userNome = user?.UserAttributes[2]?.Value;
@@ -34,7 +34,7 @@ const PaymentPage = () => {
   console.log("usuario: ", userID);
   console.log("id usuario: ", userNome);
 
-  const totalAmount = (valorLote + (valorLote*0.08)) * quantity; // Valor total calculado
+  const totalAmount = (valorLote + (valorLote * 0.08)) * quantity; // Valor total calculado
   console.log("total: ", totalAmount);
 
   // Função para copiar o código PIX
@@ -230,7 +230,7 @@ const PaymentPage = () => {
                   lot: nomeLote,
                   price: parseFloat(valorLote.toFixed(2)),
                   event_id: "etternal-nexus",
-                  application_fee: parseFloat(((totalAmount - (totalAmount*0.0498))*0.0255).toFixed(2)),
+                  application_fee: parseFloat(((totalAmount - (totalAmount * 0.0498)) * 0.0255).toFixed(2)),
                 };
 
 
@@ -426,7 +426,12 @@ const PaymentPage = () => {
                         .split(" ")
                         .slice(1)
                         .join(" "),
-                      user_id: user?.UserAttributes[3].Value, // Usando o ID do usuário logado
+                      user_id: userID,// Certifique-se de que o user_id está sendo passado
+                      name: userNome,
+                      lot: nomeLote,
+                      price: parseFloat(valorLote.toFixed(2)),
+                      event_id: "etternal-nexus",
+                      application_fee: parseFloat(((totalAmount - (totalAmount * 0.0498)) * 0.0255).toFixed(2)), // Usando o ID do usuário logado
                     };
 
                     try {
