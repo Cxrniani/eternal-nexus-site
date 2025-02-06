@@ -151,7 +151,7 @@ const FormularioCortesia = () => {
             type="number"
             name="price"
             value={formData.price}
-            readOnly
+            onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-lg"
             step="0.01"
             required
