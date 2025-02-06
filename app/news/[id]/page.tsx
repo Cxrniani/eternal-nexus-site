@@ -23,21 +23,20 @@ const NewsDetailPage = () => {
     fetchNews();
   }, [id]);
 
-  if (!newsItem) return <p>Carregando...</p>;
-
+  if (!newsItem) {
+    return <div>Carregando...</div>;
+  }
   return (
     <div className="max-w-4xl mx-auto p-6 bg-[#F5EDE5] min-h-screen">
       <h1 className="text-3xl font-bold mb-6">{newsItem.title}</h1>
       <img
         src={newsItem.image}
         alt={newsItem.title}
-        className="w-full h-auto mb-4 rounded-lg"
+        className="w-full h-auto object-cover mb-4"
       />
-      <p className="text-gray-500 text-sm">{newsItem.date}</p>
-      {/* Renderizando o conteúdo da notícia */}
       <div
-        className="mt-4 text-gray-700"
-        dangerouslySetInnerHTML={{ __html: newsItem.content }} // Exibindo o conteúdo com HTML
+        className="mt-4"
+        dangerouslySetInnerHTML={{ __html: newsItem.content }} // Renderizando HTML
       />
     </div>
   );

@@ -72,17 +72,20 @@ const News = () => {
         </h1>
         <div className="max-container">
           <Slider {...settings}>
-            {newsItems.map((item, index) => (
-              <div key={index} className="px-1 md:px-0">
-                <Card
-                  image={item.image}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  date={item.date}
-                  variant="default" // Certifique-se de usar a variante correta
-                />
-              </div>
-            ))}
+            {newsItems.map((item, index) => {
+              console.log(item.image); // Verifique se a URL da imagem está correta
+              return (
+                <div key={index} className="px-1 md:px-0">
+                  <Card
+                    image={item.image}
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    date={item.date}
+                    variant="default"
+                  />
+                </div>
+              );
+            })}
           </Slider>
         </div>
       </AnimatedComponent>

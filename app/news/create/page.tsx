@@ -4,9 +4,10 @@ import NewsForm from "@/components/NewsForm";
 
 const CreateNewsPage = () => {
   const handleAddNews = async (newsItem: {
-    image: string;
+    image: string | null; // Tipagem correta para imagem
     title: string;
     subtitle: string;
+    content: string; // Adicionando o campo content
     date: string;
     content: string;
   }) => {
