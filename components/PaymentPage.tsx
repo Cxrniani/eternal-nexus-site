@@ -19,21 +19,23 @@ const PaymentPage = () => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const userID = user?.UserAttributes[3]?.Value;
-  const userNome = user?.UserAttributes[2]?.Value;
-
-  console.log("usuario: ", userID);
-  console.log("id usuario: ", userNome);
-
-  // Parâmetros da URL
   const ticketLot = searchParams.get("lot");
   const quantity = Number(searchParams.get("quantity"));
   const paymentMethod = searchParams.get("method");
   const nomeLote = searchParams.get("nome");
   const valorLote = Number(searchParams.get("valor"));
 
-  const totalAmount = valorLote * quantity; // Valor total calculado
+
+  const userID = user?.UserAttributes[3]?.Value;
+  const userNome = user?.UserAttributes[2]?.Value;
+
+  console.log("lote: ", nomeLote);
+  console.log("valor: ", valorLote - (valorLote * 0.080));
+  console.log("usuario: ", userID);
+  console.log("id usuario: ", userNome);
+
+  const totalAmount = (valorLote + (valorLote * 0.08)) * quantity; // Valor total calculado
+  console.log("total: ", totalAmount);
 
   // Função para copiar o código PIX
   const copyPixCode = () => {
@@ -154,10 +156,16 @@ const PaymentPage = () => {
               cardNumber: {
                 id: "form-checkout__cardNumber",
                 placeholder: "Número do cartão",
+                style: {
+                  height: "100%",
+                },
               },
               securityCode: {
                 id: "form-checkout__securityCode",
                 placeholder: "CVV",
+                style: {
+                  height: "100%",
+                },
               },
               installments: {
                 id: "form-checkout__installments",
@@ -170,6 +178,9 @@ const PaymentPage = () => {
               expirationDate: {
                 id: "form-checkout__expirationDate",
                 placeholder: "MM/AA",
+                style: {
+                  height: "100%",
+                },
               },
               identificationType: {
                 id: "form-checkout__identificationType",
@@ -179,6 +190,7 @@ const PaymentPage = () => {
                 id: "form-checkout__identificationNumber",
                 placeholder: "Número do documento",
               },
+
             },
             callbacks: {
               onFormMounted: (error: Error | undefined) => {
@@ -199,6 +211,12 @@ const PaymentPage = () => {
                   cardholderEmail,
                 } = cardForm.getCardFormData();
 
+                const streetName = (document.getElementById("form-checkout__streetName") as HTMLInputElement).value;
+                const streetNumber = (document.getElementById("form-checkout__streetNumber") as HTMLInputElement).value;
+                const zipCode = (document.getElementById("form-checkout__zipCode") as HTMLInputElement).value;
+                const city = (document.getElementById("form-checkout__city") as HTMLInputElement).value;
+                const state = (document.getElementById("form-checkout__state") as HTMLInputElement).value;
+
                 if (
                   !token ||
                   !paymentMethodId ||
@@ -206,7 +224,12 @@ const PaymentPage = () => {
                   !installments ||
                   !identificationNumber ||
                   !identificationType ||
-                  !cardholderEmail
+                  !cardholderEmail ||
+                  !streetName ||
+                  !streetNumber ||
+                  !zipCode ||
+                  !city ||
+                  !state
                 ) {
                   alert("Por favor, preencha todos os campos corretamente.");
                   return;
@@ -223,15 +246,26 @@ const PaymentPage = () => {
                   transaction_amount: totalAmount,
                   ticketLot,
                   quantity,
-                  user_id: userID, // Certifique-se de que o user_id está sendo passado
+                  user_id: userID,
                   name: userNome,
+                  lot: nomeLote,
+                  price: parseFloat(valorLote.toFixed(2)),
+                  event_id: "etternal-nexus",
+                  application_fee: parseFloat(((totalAmount - (totalAmount * 0.0498)) * 0.0255).toFixed(2)),
+                  address: {
+                    streetName,
+                    streetNumber,
+                    zipCode,
+                    city,
+                    state,
+                  },
                 };
 
                 fetch("http://127.0.0.1:3000/process_payment", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${accessToken}`, // Usar o token do AuthContext
+                    Authorization: `Bearer ${accessToken}`,
                   },
                   body: JSON.stringify(paymentData),
                 })
@@ -239,24 +273,15 @@ const PaymentPage = () => {
                   .then((result) => {
                     if (result.success) {
                       if (result.status === "approved") {
-                        alert(
-                          "Pagamento aprovado! Redirecionando para a página de confirmação..."
-                        );
+                        alert("Pagamento aprovado! Redirecionando para a página de confirmação...");
                         window.location.href = "pagamento-aprovado";
-                      } else if (
-                        result.status === "in_process" ||
-                        result.status === "pending"
-                      ) {
-                        alert(
-                          "Seu pagamento está em processamento. Você receberá uma confirmação por e-mail."
-                        );
+                      } else if (result.status === "in_process" || result.status === "pending") {
+                        alert("Seu pagamento está em processamento. Você receberá uma confirmação por e-mail.");
                         window.location.href = "/pagamento-pendente";
                       }
                     } else {
                       if (result.status === "rejected") {
-                        alert(
-                          "Pagamento rejeitado. Por favor, tente novamente com outro método de pagamento."
-                        );
+                        alert("Pagamento rejeitado. Por favor, tente novamente com outro método de pagamento.");
                       } else {
                         alert(`Erro no pagamento: ${result.error}`);
                       }
@@ -264,9 +289,7 @@ const PaymentPage = () => {
                   })
                   .catch((error) => {
                     console.error("Erro na requisição:", error);
-                    alert(
-                      "Ocorreu um erro ao processar o pagamento. Tente novamente."
-                    );
+                    alert("Ocorreu um erro ao processar o pagamento. Tente novamente.");
                   });
               },
               onFetching: (resource: string) => {
@@ -306,7 +329,7 @@ const PaymentPage = () => {
   console.log("Renderizando PaymentPage com nome:", name);
 
   return (
-    <div className="w-full h-auto bg-slate-950">
+    <div className="w-full h-auto bg-zinc-900">
       <div className="max-container py-5 flex-row">
         <div className="flex w-full">
           <div className="flex flex-col justify-center w-full">
@@ -325,16 +348,16 @@ const PaymentPage = () => {
                   {/* Campos do formulário */}
                   <div
                     id="form-checkout__cardNumber"
-                    className="text-black w-full h-12 border bg-white border-gray-500 rounded-sm p-2"
+                    className="text-black w-full h-12 align-top border bg-white border-gray-500 rounded-sm pl-2"
                   ></div>
                   <div className="flex justify-start gap-5">
                     <div
                       id="form-checkout__expirationDate"
-                      className="w-[100px] text-black h-12 border bg-white border-gray-500 rounded-sm p-2"
+                      className="w-[100px] text-black h-12 border bg-white border-gray-500 rounded-sm pl-2"
                     ></div>
                     <div
                       id="form-checkout__securityCode"
-                      className="w-[100px] h-12 border bg-white text-black border-gray-500 rounded-sm p-2"
+                      className="w-[100px] h-12 border bg-white text-black border-gray-500 rounded-sm pl-2"
                     ></div>
                   </div>
                   <input
@@ -362,6 +385,36 @@ const PaymentPage = () => {
                     id="form-checkout__identificationNumber"
                     className="w-full p-2 border border-gray-500 text-black rounded-sm"
                     placeholder="Número de Identificação"
+                  />
+                  <input
+                    type="text"
+                    id="form-checkout__streetName"
+                    className="w-full p-2 border text-black border-gray-500 rounded-sm"
+                    placeholder="Nome da Rua"
+                  />
+                  <input
+                    type="text"
+                    id="form-checkout__streetNumber"
+                    className="w-full p-2 border text-black border-gray-500 rounded-sm"
+                    placeholder="Número"
+                  />
+                  <input
+                    type="text"
+                    id="form-checkout__zipCode"
+                    className="w-full p-2 border text-black border-gray-500 rounded-sm"
+                    placeholder="CEP"
+                  />
+                  <input
+                    type="text"
+                    id="form-checkout__city"
+                    className="w-full p-2 border text-black border-gray-500 rounded-sm"
+                    placeholder="Cidade"
+                  />
+                  <input
+                    type="text"
+                    id="form-checkout__state"
+                    className="w-full p-2 border text-black border-gray-500 rounded-sm"
+                    placeholder="Estado"
                   />
                   <input
                     type="email"
@@ -400,6 +453,10 @@ const PaymentPage = () => {
                   onSubmit={async (event) => {
                     event.preventDefault();
 
+                    const transactionAmount = (valorLote * quantity) * 1.08; // Valor total com 8% de taxa
+                    const mercadoPagoFee = transactionAmount * 0.0099; // Taxa do Mercado Pago (0,99%)
+                    const applicationFee = (valorLote * quantity * 0.08) - mercadoPagoFee; // Sua taxa líquida
+
                     const pixData = {
                       cardholderEmail: (
                         document.getElementById("pix-email") as HTMLInputElement
@@ -408,7 +465,7 @@ const PaymentPage = () => {
                         document.getElementById("pix-cpf") as HTMLInputElement
                       ).value,
                       identificationType: "CPF",
-                      transaction_amount: totalAmount,
+                      transaction_amount: parseFloat(transactionAmount.toFixed(2)),
                       firstName: (
                         document.getElementById("pix-name") as HTMLInputElement
                       ).value.split(" ")[0],
@@ -418,16 +475,23 @@ const PaymentPage = () => {
                         .split(" ")
                         .slice(1)
                         .join(" "),
-                      user_id: user?.UserAttributes[3].Value, // Usando o ID do usuário logado
+                      user_id: userID,// Certifique-se de que o user_id está sendo passado
+                      name: userNome,
+                      lot: nomeLote,
+                      price: parseFloat(valorLote.toFixed(2)),
+                      event_id: "etternal-nexus",
+                      application_fee: parseFloat(applicationFee.toFixed(2)),
+                      quantity: quantity,
                     };
 
                     try {
                       const response = await fetch(
-                        "http://127.0.0.1:5000/process_payment_pix",
+                        "http://127.0.0.1:3000/process_payment_pix",
                         {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
+                            Authorization: `Bearer ${accessToken}`
                           },
                           body: JSON.stringify(pixData),
                         }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import AnimatedComponent from "@/components/AnimatedComponent.client";
 import Slider from "react-slick";
@@ -8,6 +9,25 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 const News = () => {
+  const [newsItems, setNewsItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:3000/news");
+        if (!response.ok) {
+          throw new Error("Erro ao buscar notícias");
+        }
+        const data = await response.json();
+        console.log("Notícias recebidas:", data);
+        setNewsItems(data);
+      } catch (error) {
+        console.error("Erro ao buscar notícias:", error);
+      }
+    };
+
+    fetchNews();
+  }, []);
   const [newsItems, setNewsItems] = useState<any[]>([]);
 
   useEffect(() => {

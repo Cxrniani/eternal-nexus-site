@@ -23,12 +23,13 @@ export const Navbar = () => {
         </Link>
 
         {/* Links para desktop */}
-        <ul className="hidden h-full gap-12 lg:flex">
+        <ul className="hidden h-full gap-20 mx-auto pl-28 lg:flex flex-row justify-between items-center">
           {NAV_LINKS.map((link) => (
             <Link
               href={link.href}
               key={link.key}
-              className="font- text-white text-bold flexCenter cursor-pointer  transition-all text-lg hover:font-extrabold hover:text-extrabold ease-in-out"
+              className="font-logoSuave text-white text-bold justify-between cursor-pointer  
+              transition-all text-lg hover:text-xl hover:text-extrabold ease-in-out"
             >
               {link.label}
             </Link>

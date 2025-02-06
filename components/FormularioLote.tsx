@@ -47,7 +47,7 @@ const FormularioLote = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
-        const lote: Lote = { nome, descricao, valor, quantidade };
+        const lote: Lote = { nome, descricao, valor, quantidade, };
 
         try {
             let response;
@@ -187,7 +187,7 @@ const FormularioLote = () => {
                             <tr key={lote.id}>
                                 <td className="border border-gray-500 p-2">{lote.nome}</td>
                                 <td className="border border-gray-500 p-2">{lote.descricao}</td>
-                                <td className="border border-gray-500 p-2">R$ {lote.valor.toFixed(2)}</td>
+                                <td className="border border-gray-500 p-2">R$ {Number(lote.valor).toFixed(2)}</td>
                                 <td className="border border-gray-500 p-2">{lote.quantidade}</td>
                                 <td className="border border-gray-500 p-2">
                                     <button

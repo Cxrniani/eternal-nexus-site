@@ -61,7 +61,8 @@ const SelectionPage = () => {
     }, [isAuthenticated]);
 
     const loteSelecionado = lotes.find((lote) => lote.id.toString() === ticketLot);
-    const totalAmount = loteSelecionado ? loteSelecionado.valor * quantity : 0;
+    const tax = loteSelecionado ? loteSelecionado.valor * 0.08 : 0;
+    const totalAmount = loteSelecionado ? (Number(loteSelecionado.valor) + Number(tax) ) * quantity : 0;
 
     const handleProceedToPayment = () => {
         if (!paymentMethod) {
@@ -110,10 +111,11 @@ const SelectionPage = () => {
                                     >
                                         {lotes.map((lote) => (
                                             <option key={lote.id} value={lote.id}>
-                                                {lote.nome} - R$ {lote.valor.toFixed(2)}
+                                                {lote.nome} - R$ {Number(lote.valor).toFixed(2)}
                                             </option>
                                         ))}
                                     </select>
+                                    <p className="text-zinc-400">+ R$ {tax.toFixed(2)} de Taxa de Serviço</p>
                                 </div>
 
                                 {/* Seletor de Quantidade */}
