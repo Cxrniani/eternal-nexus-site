@@ -9,7 +9,6 @@ const CreateNewsPage = () => {
     subtitle: string;
     content: string; // Adicionando o campo content
     date: string;
-    content: string;
   }) => {
     try {
       const response = await fetch("http://127.0.0.1:3000/news/create", {

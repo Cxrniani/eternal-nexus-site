@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Usando o hook de navegação do Next.js
 
 interface AuthContextType {
   user: any;
@@ -16,13 +17,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter(); // Navegação
 
   // Função para restaurar a sessão ao carregar a página
   const restoreSession = async () => {
     const token = localStorage.getItem("access_token");
+
     if (!token) {
       setUser(null);
       setIsAuthenticated(false);
+      router.push("/login"); // Redireciona para o login se o token não estiver presente
       return;
     }
 
@@ -30,22 +34,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const response = await fetch("http://127.0.0.1:3000/user", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Enviar o token corretamente
         },
       });
 
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData.data);
+        setUser(userData.user); // Usar as informações retornadas do usuário
         setAccessToken(token);
         setIsAuthenticated(true);
       } else {
+        const errorData = await response.json();
+        console.error("Erro na API /user:", errorData);
+        localStorage.removeItem("access_token"); // Remove token caso o usuário não seja autenticado
         setUser(null);
         setIsAuthenticated(false);
+        router.push("/login"); // Redireciona para o login se a resposta for inválida
       }
     } catch (error) {
+      console.error("Erro ao restaurar sessão:", error);
+      localStorage.removeItem("access_token"); // Remove token em caso de erro
       setUser(null);
       setIsAuthenticated(false);
+      router.push("/login"); // Redireciona para o login se ocorrer erro
     }
   };
 
@@ -66,20 +77,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem(
-          "access_token",
-          data.data.AuthenticationResult.AccessToken
-        );
+        const accessToken = data?.data?.AuthenticationResult?.AccessToken;
 
-        // Atualiza o estado do usuário
+        if (!accessToken) {
+          throw new Error("Token não recebido da API.");
+        }
+
+        localStorage.setItem("access_token", accessToken);
+
         setUser({
-          ...data.data, // Inclui o user_id na resposta
-          id: data.data.user_id, // Armazena o user_id
+          ...data.data,
+          id: data.data.user_id,
         });
-        setAccessToken(data.data.AuthenticationResult.AccessToken);
+
+        setAccessToken(accessToken);
         setIsAuthenticated(true);
 
-        // Retorna os dados do usuário para indicar que o login foi concluído
         return data.data;
       } else {
         const errorData = await response.json();
@@ -111,6 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setAccessToken(null);
       setIsAuthenticated(false);
+      router.push("/login"); // Redireciona para o login após logout
     }
   };
 

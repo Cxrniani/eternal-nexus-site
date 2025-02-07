@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import AnimatedComponent from "@/components/AnimatedComponent.client";
 import Slider from "react-slick";
@@ -28,8 +27,6 @@ const News = () => {
 
     fetchNews();
   }, []);
-  const [newsItems, setNewsItems] = useState<any[]>([]);
-
   useEffect(() => {
     const fetchNews = async () => {
       try {

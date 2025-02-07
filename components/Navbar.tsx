@@ -45,7 +45,9 @@ export const Navbar = () => {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 text-white text-md font-bold hover:text-gray-300 transition-all"
               >
-                Bem-vindo, {user?.UserAttributes?.find((attr: any) => attr.Name === "name")?.Value || "Usuário"}
+                Bem-vindo,{" "}
+                {user?.UserAttributes?.find((attr: any) => attr.Name === "name")
+                  ?.Value || "Usuário"}
                 <Image
                   src="/right-arrow.svg"
                   alt="dropdown"
@@ -81,7 +83,7 @@ export const Navbar = () => {
             </div>
           ) : (
             // Botão Entrar como link
-            <Link href="/check-email">
+            <Link href="/login">
               <Button
                 type="button"
                 title="Entrar"
@@ -155,7 +157,7 @@ export const Navbar = () => {
                   </>
                 ) : (
                   <Link
-                    href="/check-email"
+                    href="/login"
                     className="text-slate-300 py-2 hover:bg-gray-100 px-4 rounded-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
