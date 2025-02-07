@@ -144,7 +144,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         isAuthenticated,
         isAdmin: groups.includes("Admin"),
-        isLoading, // Retorna isLoading no contexto
+        isLoading, // 🚀 Retorna isLoading no contexto
       }}
     >
       {children}
@@ -159,3 +159,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+

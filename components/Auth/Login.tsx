@@ -24,12 +24,11 @@ const Login = () => {
     if (isLoading) return; // Se ainda está carregando, não faz nada
 
     if (isAuthenticated) {
-      router.push("/dashboard");
+        router.push("/dashboard");
     } else {
-      setLoading(false); // Somente libera a renderização após autenticação confirmada
+        setLoading(false); // Somente libera a renderização após autenticação confirmada
     }
-  }, [isAuthenticated, isLoading, router]);
-
+}, [isAuthenticated, isLoading, router]);
   // Preenche o e-mail automaticamente se vier como parâmetro na URL
   useEffect(() => {
     const emailParam = searchParams.get("email");

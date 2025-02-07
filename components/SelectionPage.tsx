@@ -13,23 +13,35 @@ interface Lote {
     quantidade: number;
 }
 
+
+
+
+
+
+
+
 const SelectionPage = () => {
     const router = useRouter();
-    const { isAuthenticated } = useAuth();
     const [lotes, setLotes] = useState<Lote[]>([]);
     const [ticketLot, setTicketLot] = useState<string>("");
     const [quantity, setQuantity] = useState<number>(1);
     const [paymentMethod, setPaymentMethod] = useState<string>("");
-    const [isLoading, setIsLoading] = useState<boolean>(true); // Estado de carregamento
+    const {isAuthenticated, isLoading} = useAuth();
 
     useEffect(() => {
-        // Verifica a autenticação antes de qualquer coisa
+        if (isLoading) return; // Se ainda está carregando, não faz nada
+    
         if (!isAuthenticated) {
             router.push("/login");
         } else {
-            setIsLoading(false); // Autenticação confirmada, permite renderização
+            fetchLotes();
         }
-    }, [isAuthenticated, router]);
+        
+    }, [isAuthenticated, isLoading, router]);
+    
+    if (isLoading) {
+        return <div className="text-white text-center">Carregando...</div>;
+    }
 
     // Busca os lotes da API
     const fetchLotes = async () => {
@@ -52,13 +64,6 @@ const SelectionPage = () => {
             console.error("Erro ao buscar lotes:", error);
         }
     };
-
-    // Busca os lotes após confirmar a autenticação
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchLotes();
-        }
-    }, [isAuthenticated]);
 
     const loteSelecionado = lotes.find((lote) => lote.id.toString() === ticketLot);
     const tax = loteSelecionado ? loteSelecionado.valor * 0.08 : 0;
