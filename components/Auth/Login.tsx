@@ -53,7 +53,7 @@ const Login = () => {
       });
 
       const data = await response.json();
-
+      console.log(data);
       if (data.exists) {
         await login(email, password);
         window.location.reload();
@@ -62,6 +62,7 @@ const Login = () => {
         router.push(`/register?email=${encodeURIComponent(email)}`);
       }
     } catch (err) {
+      console.error(err); // Exibe o erro completo no console
       setError("Erro ao fazer login. Verifique suas credenciais.");
     } finally {
       setLoading(false);
