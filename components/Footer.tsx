@@ -17,7 +17,7 @@ const Footer = () => {
         </div>
 
         <div className="flex-1 flex justify-center items-center">
-          <Image src="abstract.svg" alt="Logo" width={200} height={200} />
+          <Image src="/abstract.svg" alt="Logo" width={200} height={200} />
         </div>
 
         {/* Seção 2 */}
@@ -30,14 +30,14 @@ const Footer = () => {
             <div className="flex flex-row gap-2 pt-2 justify-center md:justify-start">
               <Image
               className="cursor-pointer"
-              src="instagram.svg"
+              src="/instagram.svg"
               alt="Instagram"
               width={40}
               height={40}
               />
               <Image
               className="cursor-pointer"
-              src="whatsapp.svg"
+              src="/whatsapp.svg"
               alt="WhatsApp"
               width={40}
               height={40}
