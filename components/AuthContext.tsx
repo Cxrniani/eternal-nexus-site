@@ -1,13 +1,21 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+
+interface DecodedToken {
+  "cognito:groups"?: string[];
+}
 
 interface AuthContextType {
   user: any;
   accessToken: string | null;
+  groups: string[];
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  isLoading: boolean; // 🚀 Novo estado de carregamento
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,22 +24,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [groups, setGroups] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // 🚀 Adiciona estado de carregamento
 
-  // Função para restaurar a sessão ao carregar a página
   const restoreSession = async () => {
+    setIsLoading(true); // Inicia o carregamento
     const token = localStorage.getItem("access_token");
+
     if (!token) {
       setUser(null);
       setIsAuthenticated(false);
+      setGroups([]);
+      setIsLoading(false); // Finaliza carregamento
       return;
     }
 
     try {
+      const decodedToken: DecodedToken = jwtDecode(token);
+      setGroups(decodedToken["cognito:groups"] || []);
+
       const response = await fetch("http://127.0.0.1:3000/user", {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -42,81 +56,77 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
         setUser(null);
         setIsAuthenticated(false);
+        setGroups([]);
       }
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+      setGroups([]);
+    } finally {
+      setIsLoading(false); // Finaliza carregamento
     }
   };
 
-  // Restaura a sessão ao carregar a página
   useEffect(() => {
     restoreSession();
   }, []);
 
   const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
       const response = await fetch("http://127.0.0.1:3000/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem(
-          "access_token",
-          data.data.AuthenticationResult.AccessToken
-        );
+        const token = data.data.AuthenticationResult.AccessToken;
+        localStorage.setItem("access_token", token);
 
-        // Atualiza o estado do usuário
+        const decodedToken: DecodedToken = jwtDecode(token);
+        setGroups(decodedToken["cognito:groups"] || []);
+
         setUser({
-          ...data.data, // Inclui o user_id na resposta
-          id: data.data.user_id, // Armazena o user_id
+          ...data.data,
+          id: data.data.user_id,
         });
-        setAccessToken(data.data.AuthenticationResult.AccessToken);
+        setAccessToken(token);
         setIsAuthenticated(true);
-
-        // Retorna os dados do usuário para indicar que o login foi concluído
-        return data.data;
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error);
+        throw new Error("Falha no login");
       }
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
+      setGroups([]);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = async () => {
-    try {
-      const token = localStorage.getItem("access_token");
-      if (token) {
-        await fetch("http://127.0.0.1:3000/logout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-    } finally {
-      localStorage.removeItem("access_token");
-      setUser(null);
-      setAccessToken(null);
-      setIsAuthenticated(false);
-    }
+    localStorage.removeItem("access_token");
+    setUser(null);
+    setAccessToken(null);
+    setIsAuthenticated(false);
+    setGroups([]);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, login, logout, isAuthenticated }}
+      value={{
+        user,
+        accessToken,
+        groups,
+        login,
+        logout,
+        isAuthenticated,
+        isAdmin: groups.includes("Admin"),
+        isLoading, // 🚀 Retorna isLoading no contexto
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -125,8 +135,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
+
+

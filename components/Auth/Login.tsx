@@ -12,7 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
   const handleForgotPassword = () => {
     // Redirecione para a página de esqueci minha senha com o e-mail como parâmetro de consulta
@@ -21,11 +21,14 @@ const Login = () => {
 
   // Redireciona para o dashboard se o usuário já estiver autenticado
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated, router]);
+    if (isLoading) return; // Se ainda está carregando, não faz nada
 
+    if (isAuthenticated) {
+        router.push("/dashboard");
+    } else {
+        setLoading(false); // Somente libera a renderização após autenticação confirmada
+    }
+}, [isAuthenticated, isLoading, router]);
   // Preenche o e-mail automaticamente se vier como parâmetro na URL
   useEffect(() => {
     const emailParam = searchParams.get("email");
@@ -87,10 +90,10 @@ const Login = () => {
           />
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full bg-blue-500 text-white rounded p-2"
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {isLoading ? "Entrando..." : "Entrar"}
           </button>
         </form>
         <div className="mt-4 text-center">
