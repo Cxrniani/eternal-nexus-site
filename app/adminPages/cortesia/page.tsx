@@ -3,12 +3,13 @@
 
 import React from "react";
 import FormularioCortesia from "@/components/FormularioCortesia";
+import AdminRoute from "@/components/AdminRoute";
 
 const FormularioCortesiaPage = () => {
     return (
-        <>
+        <AdminRoute>
             <FormularioCortesia/>
-        </>
+        </AdminRoute>
     );
 };
 

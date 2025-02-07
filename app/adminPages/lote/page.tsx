@@ -3,12 +3,13 @@
 
 import React from "react";
 import FormularioLote from "@/components/FormularioLote";
+import AdminRoute from "@/components/AdminRoute";
 
 const FormularioLotePage = () => {
     return (
-        <>
+        <AdminRoute>
             <FormularioLote/>
-        </>
+        </AdminRoute>
     );
 };
 
