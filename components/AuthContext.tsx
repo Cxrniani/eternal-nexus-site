@@ -9,6 +9,11 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+<<<<<<< Updated upstream
+=======
+  isAdmin: boolean;
+  isLoading: boolean; // Novo estado de carregamento
+>>>>>>> Stashed changes
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,11 +22,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<any>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+<<<<<<< Updated upstream
   const router = useRouter(); // Navegação
+=======
+  const [groups, setGroups] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // Adiciona estado de carregamento
+  console.log("AuthContext user:", user);
+  console.log("AuthContext isAuthenticated:", isAuthenticated);
+>>>>>>> Stashed changes
 
   // Função para restaurar a sessão ao carregar a página
   const restoreSession = async () => {
+<<<<<<< Updated upstream
+=======
+    console.log("Restaurando sessão..."); // Debug
+    setIsLoading(true); // Inicia o carregamento
+>>>>>>> Stashed changes
     const token = localStorage.getItem("access_token");
+    console.log("Token encontrado no localStorage:", token);
+
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      console.log("Decoded Token:", decodedToken);
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      console.log("Token expira em:", decodedToken.exp);
+      console.log("Tempo atual:", currentTime);
+
+      if (decodedToken.exp < currentTime) {
+        console.warn("Token expirado! Fazendo logout...");
+        logout();
+        return;
+      }
+    }
 
     if (!token) {
       setUser(null);
@@ -130,7 +163,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
+<<<<<<< Updated upstream
       value={{ user, accessToken, login, logout, isAuthenticated }}
+=======
+      value={{
+        user,
+        accessToken,
+        groups,
+        login,
+        logout,
+        isAuthenticated,
+        isAdmin: groups.includes("Admin"),
+        isLoading, // Retorna isLoading no contexto
+      }}
+>>>>>>> Stashed changes
     >
       {children}
     </AuthContext.Provider>

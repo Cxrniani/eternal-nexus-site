@@ -19,8 +19,15 @@ const Login = () => {
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/dashboard");
+<<<<<<< Updated upstream
     }
   }, [isAuthenticated, router]);
+=======
+    } else {
+      setLoading(false); // Somente libera a renderização após autenticação confirmada
+    }
+  }, [isAuthenticated, isLoading, router]);
+>>>>>>> Stashed changes
 
   // Preenche o e-mail automaticamente se vier como parâmetro na URL
   useEffect(() => {

@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Verify = () => {
-  const [email, setEmail] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+<<<<<<< Updated upstream
   const [success, setSuccess] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,6 +27,11 @@ const Verify = () => {
       setIsEmailEditable(true); // Permite edição se não veio por parâmetro
     }
   }, []);
+=======
+  const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+>>>>>>> Stashed changes
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,10 +43,9 @@ const Verify = () => {
 
     setLoading(true);
     setError(null);
-    setSuccess(false);
 
     try {
-      const response = await fetch("http://127.0.0.1:3000/verify", {
+      const response = await fetch("http://localhost:3000/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, code }),
@@ -47,19 +54,30 @@ const Verify = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Erro ao verificar o código");
+        throw new Error(data.error || "Erro ao verificar e-mail");
       }
 
+<<<<<<< Updated upstream
       setSuccess(true);
       setTimeout(() => router.push("/login"), 2000); // Redireciona para login após 2 segundos
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro na verificação");
+=======
+      router.push("/login");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao verificar e-mail. Tente novamente."
+      );
+>>>>>>> Stashed changes
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendCode = async () => {
+<<<<<<< Updated upstream
     if (!email) {
       setError("Digite um e-mail para reenviar o código");
       return;
@@ -97,27 +115,47 @@ const Verify = () => {
       const response = await fetch("http://127.0.0.1:3000/resend-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+=======
+    setResendLoading(true);
+    setError(null);
+    setResendSuccess(false);
+
+    try {
+      const response = await fetch("http://localhost:3000/resend-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+>>>>>>> Stashed changes
         body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Erro ao reenviar código");
+        throw new Error(data.error || "Erro ao reenviar código de confirmação");
       }
 
-      setSuccess(true);
-      setError(null);
+      setResendSuccess(true);
     } catch (err) {
+<<<<<<< Updated upstream
       setError(err instanceof Error ? err.message : "Erro no reenvio");
     } finally {
       setLoading(false);
+=======
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro ao reenviar código de confirmação. Tente novamente."
+      );
+    } finally {
+      setResendLoading(false);
+>>>>>>> Stashed changes
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
       <div className="w-96 bg-gray-800 shadow-md rounded-lg p-6">
+<<<<<<< Updated upstream
         <h1 className="text-2xl font-bold mb-4">Verificar Email</h1>
 
         {/* Campo de e-mail editável quando não veio por parâmetro */}
@@ -137,25 +175,41 @@ const Verify = () => {
           <p className="text-green-500 mb-2">Código verificado com sucesso!</p>
         )}
 
+=======
+        <h2 className="text-xl font-bold mb-4">Verificar E-mail</h2>
+        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {resendSuccess && (
+          <p className="text-green-500 mb-2">
+            Código de confirmação reenviado com sucesso!
+          </p>
+        )}
+
+>>>>>>> Stashed changes
         <form onSubmit={handleVerify}>
           <input
             type="text"
-            placeholder="Código de Verificação"
+            name="code"
+            placeholder="Código de confirmação"
             value={code}
             onChange={(e) => setCode(e.target.value)}
             required
-            className="w-full p-2 mb-4 bg-gray-700 rounded"
+            className="w-full p-2 mb-2 bg-gray-700 rounded"
           />
 
           <button
             type="submit"
             disabled={loading}
+<<<<<<< Updated upstream
             className="w-full bg-blue-500 text-white rounded p-2 disabled:opacity-50"
+=======
+            className="w-full bg-green-500 text-white rounded p-2 mt-4 disabled:opacity-50"
+>>>>>>> Stashed changes
           >
             {loading ? "Verificando..." : "Verificar"}
           </button>
         </form>
 
+<<<<<<< Updated upstream
         <div className="mt-4 text-center">
           <button
             onClick={handleResendCode}
@@ -165,6 +219,15 @@ const Verify = () => {
             {loading ? "Enviando..." : "Reenviar código de verificação"}
           </button>
         </div>
+=======
+        <button
+          onClick={handleResendCode}
+          disabled={resendLoading}
+          className="w-full bg-blue-500 text-white rounded p-2 mt-4 disabled:opacity-50"
+        >
+          {resendLoading ? "Reenviando..." : "Reenviar Código"}
+        </button>
+>>>>>>> Stashed changes
       </div>
     </div>
   );
