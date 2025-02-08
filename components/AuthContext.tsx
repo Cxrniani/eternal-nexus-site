@@ -15,7 +15,8 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  isLoading: boolean; // 🚀 Novo estado de carregamento
+  isLoading: boolean;
+  refreshUser: () => Promise<void>; // 🚀 Nova função refreshUser
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,24 +26,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [groups, setGroups] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true); // 🚀 Adiciona estado de carregamento
+  const [isLoading, setIsLoading] = useState(true);
 
-  const restoreSession = async () => {
-    setIsLoading(true); // Inicia o carregamento
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      setUser(null);
-      setIsAuthenticated(false);
-      setGroups([]);
-      setIsLoading(false); // Finaliza carregamento
-      return;
-    }
-
+  // Função para buscar os dados do usuário
+  const fetchUserData = async (token: string) => {
     try {
-      const decodedToken: DecodedToken = jwtDecode(token);
-      setGroups(decodedToken["cognito:groups"] || []);
-
       const response = await fetch("http://127.0.0.1:3000/user", {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
@@ -50,20 +38,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (response.ok) {
         const userData = await response.json();
-        setUser(userData.data);
-        setAccessToken(token);
-        setIsAuthenticated(true);
+        return userData.data;
       } else {
-        setUser(null);
-        setIsAuthenticated(false);
-        setGroups([]);
+        throw new Error("Falha ao buscar dados do usuário");
       }
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Função para restaurar a sessão
+  const restoreSession = async () => {
+    setIsLoading(true);
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      setUser(null);
+      setIsAuthenticated(false);
+      setGroups([]);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const decodedToken: DecodedToken = jwtDecode(token);
+      setGroups(decodedToken["cognito:groups"] || []);
+
+      const userData = await fetchUserData(token);
+      setUser(userData);
+      setAccessToken(token);
+      setIsAuthenticated(true);
     } catch (error) {
       setUser(null);
       setIsAuthenticated(false);
       setGroups([]);
     } finally {
-      setIsLoading(false); // Finaliza carregamento
+      setIsLoading(false);
+    }
+  };
+
+  // Função para recarregar os dados do usuário
+  const refreshUser = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setUser(null);
+      setIsAuthenticated(false);
+      setGroups([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const userData = await fetchUserData(token);
+      setUser(userData);
+    } catch (error) {
+      setUser(null);
+      setIsAuthenticated(false);
+      setGroups([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -125,7 +158,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         isAuthenticated,
         isAdmin: groups.includes("Admin"),
-        isLoading, // 🚀 Retorna isLoading no contexto
+        isLoading,
+        refreshUser, // 🚀 Adiciona refreshUser ao contexto
       }}
     >
       {children}
@@ -140,5 +174,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-
