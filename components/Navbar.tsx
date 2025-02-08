@@ -67,6 +67,13 @@ export const Navbar = () => {
                   >
                     Meus Ingressos
                   </Link>
+                  <Link
+                    href="/updateuser"
+                    className="block px-4 py-2  text-zinc-300 hover:bg-zinc-500"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    Editar Conta
+                  </Link>
                   <button
                     onClick={() => {
                       logout();
