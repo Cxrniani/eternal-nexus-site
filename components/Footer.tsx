@@ -1,4 +1,6 @@
 // /components/Footer.tsx
+"use client"
+
 import Image from "next/image";
 import React from "react";
 
@@ -29,16 +31,40 @@ const Footer = () => {
             <li>Redes sociais:</li>
             <div className="flex flex-row gap-2 pt-2 justify-center md:justify-start">
               <Image
+              onClick={() => window.open("https://www.instagram.com/espectrocrew/")}
               className="cursor-pointer"
               src="/instagram.svg"
-              alt="Instagram"
+              alt="Instagram Espectro Crew"
               width={40}
               height={40}
               />
               <Image
+              onClick={() => window.open("https://wa.me/+5567992752252")}
               className="cursor-pointer"
               src="/whatsapp.svg"
-              alt="WhatsApp"
+              alt="WhatsApp Espectro Crew"
+              width={40}
+              height={40}
+              />
+            </div>
+            <h3 className="text-lg mt-10 md:pt-0 font-bold mb-4">Suporte</h3>
+            <li className="mb-2">Email: synopsyservice@gmail.com</li>
+            <li className="mb-2">Telefone: (67) 98139-5347</li>
+            <li>Redes sociais:</li>
+            <div className="flex flex-row gap-2 pt-2 justify-center md:justify-start">
+              <Image
+              onClick={() => window.open("https://www.instagram.com/synopsy.group/")}
+              className="cursor-pointer"
+              src="/instagram.svg"
+              alt="Instagram Synopsy"
+              width={40}
+              height={40}
+              />
+              <Image
+              onClick={() => window.open("https://wa.me/+5567981395347")}
+              className="cursor-pointer"
+              src="/whatsapp.svg"
+              alt="WhatsApp Synopsy"
               width={40}
               height={40}
               />
@@ -50,7 +76,7 @@ const Footer = () => {
         <p className="pt-10 text-sm">
           Feito com ❤️ by Synopsy®
           <br />
-          Copyright © 2025 Eternal Nexus. Todos os direitos reservados.{" "}
+          Copyright © 2025 Espectro Crew. Todos os direitos reservados.{" "}
         </p>
       </div>
     </footer>

@@ -1,3 +1,5 @@
+"use client"
+
 // /components/About.tsx
 import React from "react";
 import Image from "next/image";
@@ -95,6 +97,7 @@ const About = () => {
                 </p>
                 <div className="flex flex-row gap-2 gap-x-2 w-full py-3 justify-center">
                   <Image
+                    onClick={() => window.open("https://www.instagram.com/turco_67/")}
                     className="cursor-pointer"
                     src="instagram.svg"
                     alt="Instagram"
@@ -102,6 +105,7 @@ const About = () => {
                     height={40}
                   />
                   <Image
+                    onClick={() => window.open("https://wa.me/+5567992752252")}
                     className="cursor-pointer"
                     src="whatsapp.svg"
                     alt="WhatsApp"
@@ -132,6 +136,7 @@ const About = () => {
                 </p>
                 <div className="flex flex-row gap-2 gap-x-2 w-full py-3 justify-center">
                   <Image
+                    onClick={() => window.open("https://www.instagram.com/teooo__/")}
                     className="cursor-pointer"
                     src="instagram.svg"
                     alt="Instagram"
@@ -139,6 +144,7 @@ const About = () => {
                     height={40}
                   />
                   <Image
+                    onClick={() => window.open("https://wa.me/+5567991777439")}
                     className="cursor-pointer"
                     src="whatsapp.svg"
                     alt="WhatsApp"

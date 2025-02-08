@@ -87,24 +87,25 @@ const SelectionPage = () => {
     }
 
     return (
-        <div className="w-full h-auto bg-slate-950">
+        <div className="w-full pb-10 h-auto bg-zinc-900">
             <div className="max-container flex-row">
                 <div className="flex w-full">
                     <div className="flex flex-col justify-center w-full">
-                        <h1 className="pt-5 mx-auto md:py-5 text-5xl font-extrabold text-center text-white">
+                        <h1 className="pt-5 mx-auto mt-2 text-5xl font-extrabold text-center text-white">
                             Checkout
                         </h1>
                         <div className="w-full flex justify-center">
                             <div className="w-full flex flex-col items-center">
-                                <div className="relative w-full h-[60vh]">
+                                <div className="mt-[-350px] md:mt-[-25px] relative w-[98%] md:w-full h-[70vh] mb-5 overflow-hidden">
                                     <Image
-                                        src="https://placehold.co/1080x540.png"
+                                        src="/assets/background.png"
                                         layout="fill"
-                                        objectFit="contain"
+                                        objectPosition="bottom"
                                         alt="Cover Ingresso Eternal Nexus"
+                                        className="object-contain md:object-cover md:translate-y-[10%]" // Ajuste a porcentagem conforme necessário
                                     />
                                 </div>
-                                <h1 className="text-white text-4xl font-extrabold py-5">Selecione Seu Ingresso:</h1>
+                                <h1 className="text-white text-4xl font-extrabold text-center mx-auto py-5">Selecione Seu Ingresso:</h1>
 
                                 {/* Seleção de Lote */}
                                 <div className="flex flex-col items-center gap-2 mb-4">

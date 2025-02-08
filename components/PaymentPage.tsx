@@ -343,7 +343,7 @@ const PaymentPage = () => {
               <div>
                 <form
                   id="form-checkout"
-                  className="flex flex-col space-y-4 px-4 md:px-[25%] mt-4"
+                  className="flex flex-col space-y-2 px-4 md:px-[25%] mt-4"
                 >
                   {/* Campos do formulário */}
                   <div
