@@ -14,15 +14,15 @@ const Hero = () => {
       title: "Título do Evento 1",
     },
     {
-      image: "https://placehold.co/800x600.png",
+      image: "https://placehold.co/1820x1024.png",
       title: "Título do Evento 2",
     },
     {
-      image: "https://placehold.co/800x600.png",
+      image: "https://placehold.co/1820x1024.png",
       title: "Título do Evento 3",
     },
     {
-      image: "https://placehold.co/800x600.png",
+      image: "https://placehold.co/1820x1024.png",
       title: "Título do Evento 4",
     },
   ];
@@ -34,12 +34,13 @@ const Hero = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 5000,
     arrows: false,
   };
   return (
-    <div style={{ backgroundImage: "url('/assets/hero2.jpg')" }} className='bg-zinc-950 md:bg-zinc-900 md:bg-opacity-70 bg-center bg-blend-overlay md:py-24 bg-contain'>
-      <div className='plus-container'>
+    <div style={{ backgroundImage: "url('/assets/hero2.jpg')" }} className='bg-zinc-950 md:bg-zinc-900 md:bg-opacity-70 bg-center 
+    bg-blend-overlay md:py-16 bg-contain'>
+      <div className='max-container'>
         <Slider {...settings}>
         {heroItems.map((item, index) => (
           <div key={index} className="flex justify-around px-0 mx-0">
