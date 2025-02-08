@@ -1,10 +1,17 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import DOMPurify from "dompurify";
 
 const NewsList = () => {
   const [newsItems, setNewsItems] = useState<any[]>([]);
-
+  const formatDate = (isoString: string) => {
+    return new Date(isoString).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
   useEffect(() => {
     const fetchNews = async () => {
       try {
@@ -49,10 +56,15 @@ const NewsList = () => {
                 <h2 className="text-xl font-bold text-gray-900">
                   {newsItem.title}
                 </h2>
-                <p className="text-gray-500 text-sm mt-1">{newsItem.date}</p>
-                <p className="text-gray-700 mt-3 line-clamp-2">
-                  {newsItem.subtitle}
+                <p className="text-gray-500 text-sm mt-1">
+                  {formatDate(newsItem.date)}
                 </p>
+                <p
+                  className="text-gray-700 mt-3 line-clamp-2"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(newsItem.subtitle),
+                  }}
+                />
                 <span className="text-blue-600 font-semibold mt-3 hover:underline">
                   Ler mais...
                 </span>

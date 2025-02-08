@@ -3,31 +3,10 @@ import React from "react";
 import NewsForm from "@/components/NewsForm";
 
 const CreateNewsPage = () => {
-  const handleAddNews = async (newsItem: {
-    image: string | null; // Tipagem correta para imagem
-    title: string;
-    subtitle: string;
-    content: string; // Adicionando o campo content
-    date: string;
-  }) => {
-    try {
-      const response = await fetch("http://127.0.0.1:3000/news/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newsItem),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro ao adicionar notícia");
-      }
-
-      const data = await response.json();
-      console.log("Notícia adicionada com sucesso:", data);
-    } catch (error) {
-      console.error("Erro ao adicionar notícia:", error);
-    }
+  const handleAddNews = async (newsData: any) => {
+    // Apenas redireciona ou mostra mensagem
+    console.log("Notícia criada com sucesso:", newsData);
+    alert("Notícia publicada!");
   };
 
   return (

@@ -82,8 +82,7 @@ export const Navbar = () => {
               )}
             </div>
           ) : (
-            // Botão Entrar como link
-            <Link href="/login">
+            <Link href="/check-email">
               <Button
                 type="button"
                 title="Entrar"
