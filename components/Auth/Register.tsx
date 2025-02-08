@@ -2,20 +2,23 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useAuth } from "@/components/AuthContext";
 
 const Register = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [gender, setGender] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("+55"); // Inicializa com "+55"
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Estados para as validações da senha
   const [hasUpperCase, setHasUpperCase] = useState(false);
@@ -26,6 +29,9 @@ const Register = () => {
 
   // Redireciona para o dashboard se o usuário já estiver autenticado
   useEffect(() => {
+    if (isAuthenticated === false) {
+      return;
+    }
     if (isAuthenticated) {
       router.push("/dashboard");
     }
@@ -48,7 +54,7 @@ const Register = () => {
   };
 
   const validateForm = () => {
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !birthdate || !gender || !phoneNumber) {
       setError("Todos os campos são obrigatórios.");
       return false;
     }
@@ -64,7 +70,12 @@ const Register = () => {
       );
       return false;
     }
+    if (!phoneNumber.startsWith("+")) {
+      setPhoneError("O código de país (ex: +55) é obrigatório.");
+      return false;
+    }
     setPasswordError(null);
+    setPhoneError(null);
     return true;
   };
 
@@ -80,7 +91,14 @@ const Register = () => {
       const registerResponse = await fetch("http://127.0.0.1:3000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+          birthdate,
+          gender,
+          phone_number: phoneNumber,
+        }),
       });
 
       const registerData = await registerResponse.json();
@@ -101,6 +119,11 @@ const Register = () => {
       setLoading(false);
     }
   };
+
+  // Se o usuário estiver autenticado, não renderiza o formulário de registro
+  if (isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
@@ -140,6 +163,42 @@ const Register = () => {
             required
             className="w-full p-2 mb-2 bg-gray-700 rounded"
           />
+          <input
+            type="date"
+            placeholder="Data de Nascimento"
+            value={birthdate}
+            onChange={(e) => setBirthdate(e.target.value)}
+            required
+            className="w-full p-2 mb-2 bg-gray-700 rounded"
+          />
+          <select
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            required
+            className="w-full p-2 mb-2 bg-gray-700 rounded"
+          >
+            <option value="">Selecione o gênero</option>
+            <option value="male">Masculino</option>
+            <option value="female">Feminino</option>
+            <option value="other">Outro</option>
+          </select>
+          <input
+            type="tel"
+            placeholder="Telefone"
+            value={phoneNumber}
+            onChange={(e) => {
+              const value = e.target.value;
+              setPhoneNumber(value);
+              if (!value.startsWith("+")) {
+                setPhoneError("O código de país (ex: +55) é obrigatório.");
+              } else {
+                setPhoneError(null);
+              }
+            }}
+            required
+            className="w-full p-2 mb-2 bg-gray-700 rounded"
+          />
+          {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
           <button
             type="submit"
             disabled={loading}
