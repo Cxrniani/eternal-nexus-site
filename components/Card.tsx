@@ -21,12 +21,12 @@ const Card: React.FC<CardProps> = ({
   return (
     <div
       className={`bg-transparent overflow-hidden flex flex-col ${
-        variant === "large" ? "max-container" : "w-full sm:w-64 md:w-72 lg:w-80"
+        variant === "large" ? "w-full" : "w-full sm:w-64 md:w-72 lg:w-80"
       }`}
     >
       <div
         className={`relative w-full ${
-          variant === "large" ? "w-full h-52 md:h-[500px] aspect-[4/4]" : "h-auto"
+          variant === "large" ? "w-full h-52 md:h-[600px] aspect-[4/4]" : "h-auto"
         } aspect-[4/4]`}
       >
         <Image className="" src={image} alt={title} layout="fill" objectFit="cover" />
