@@ -1,11 +1,12 @@
 import PaymentPage from "@/components/PaymentPage";
-import SelectionPage from "@/components/SelectionPage";
+import React, { Suspense } from 'react';
 
+const PaymentPageWithSuspense = () => {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <PaymentPage />
+    </Suspense>
+  );
+};
 
-export default function Payment() {
-    return (
-        <>
-            <PaymentPage />
-        </>
-    )
-}
+export default PaymentPageWithSuspense;
