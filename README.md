@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Etternal Nexus Experience — Frontend
 
-## Getting Started
+Interface web do projeto **Etternal Nexus Experience**, desenvolvida com **Next.js**, **React** e **TypeScript**. Este projeto foi construído como estudo de caso de um sistema completo para gerenciamento de eventos.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🧰 Tecnologias Utilizadas
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Next.js** com SSR
+- **React**
+- **TypeScript**
+- **Axios** para requisições HTTP
+- **Quill.js** para edição de texto no CMS
+- **Tailwind CSS** (caso utilizado)
+- **Amazon S3** para armazenar mídias (via backend)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🌟 Funcionalidades
 
-## Learn More
+### 🖼️ Hero Section com Carrossel
 
-To learn more about Next.js, take a look at the following resources:
+- Imagens dinâmicas adicionadas via CMS
+- Armazenamento das mídias no Amazon S3
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📰 Seção de Notícias
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Editor de texto com Quill.js
+- Upload de imagens integrado via CMS
 
-## Deploy on Vercel
+### ℹ️ Seção de Informações
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Detalhes sobre o evento e seus organizadores
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 👤 Área do Usuário
+
+- Visualização de ingressos comprados
+- Exibição de QR Code gerado e informações sobre o ingresso
+- Ingressos são inutilizados após leitura pelos administradores
+
+### 🎟️ Compra de Ingressos
+
+- Integração com o backend para exibir lotes disponíveis
+- Pagamento via Mercado Pago (PIX e cartão)
+- Redirecionamento automático após pagamento aprovado
+
+---
+
+## 🌍 Deploy
+
+- Dockerizado
+- Implantado em uma **instância EC2 pública**
+- Comunicação direta com a instância backend (privada)
+
+---
+
+**Etternal Nexus Experience — Frontend** ✨
