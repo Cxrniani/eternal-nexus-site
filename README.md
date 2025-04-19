@@ -1,6 +1,7 @@
 # Etternal Nexus Experience — Frontend
 
 Interface web do projeto **Etternal Nexus Experience**, desenvolvida com **Next.js**, **React** e **TypeScript**. Este projeto foi construído como estudo de caso de um sistema completo para gerenciamento de eventos.
+
 🔗 [Repositório do Backend](https://github.com/Cxrniani/apis-synopsy/tree/master)
 
 ---
